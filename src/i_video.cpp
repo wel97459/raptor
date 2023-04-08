@@ -718,8 +718,8 @@ static void CreateUpscaledTexture(bool force)
     video = (unsigned char *) malloc((wU * hU) * sizeof(int));
     crt_init(&crt, wU, hU, CRT_PIX_FORMAT_RGBA, video);
 
-    crt.blend = 1;
-    crt.scanlines = 1;
+    crt.blend = 0;
+    crt.scanlines = 0;
     crt.saturation = 20;
 
     ntsc.format = CRT_PIX_FORMAT_RGBA;
@@ -841,8 +841,8 @@ void I_FinishUpdate (void)
     ntsc.w = argbbuffer->w;
     ntsc.h = argbbuffer->h;
     crt_modulate(&crt, &ntsc);
-    crt_demodulate(&crt, 0);
-    ntsc.field = !ntsc.field;
+    crt_demodulate(&crt, 5);
+
     SDL_Point size;
     SDL_QueryTexture(textureCRT, NULL, NULL, &size.x, &size.y);
     SDL_UpdateTexture(textureCRT, NULL, video, size.x * sizeof(Uint32));

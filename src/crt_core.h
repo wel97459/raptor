@@ -53,7 +53,7 @@ extern "C" {
 #define CRT_PIX_FORMAT_BGRA 5  /* 4 bytes per pixel [B,G,R,A,B,G,R,A...]   */
 
 /* do bloom emulation (side effect: makes screen have black borders) */
-#define CRT_DO_BLOOM    0  /* does not work for NES */
+#define CRT_DO_BLOOM    1  /* does not work for NES */
 #define CRT_DO_VSYNC    1  /* look for VSYNC */
 #define CRT_DO_HSYNC    1  /* look for HSYNC */
 
