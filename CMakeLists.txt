@@ -16,6 +16,8 @@ include_directories(./include/TinySoundFont/)
 
 add_subdirectory(./include/textscreen/include)
 add_executable(${CMAKE_PROJECT_NAME}
+    src/crt_core.c
+    src/crt_ntsc.c
     src/tile.cpp
     src/gssapi.cpp
     src/objects.cpp

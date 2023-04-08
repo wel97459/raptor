@@ -38,12 +38,18 @@
 #include "musapi.h"
 #include "prefapi.h"
 #include "joyapi.h"
+#include "crt_core.h"
+#include "crt_ntsc.h"
 
 // These are (1) the window (or the full screen) that our game is rendered to
 // and (2) the renderer that scales the texture (see below) into this window.
 
 static SDL_Window *screen;
 static SDL_Renderer *renderer;
+
+unsigned char *video = NULL;
+struct NTSC_SETTINGS ntsc;
+struct CRT crt;
 
 // Window title
 
@@ -59,6 +65,7 @@ static const char *window_title = "";
 static SDL_Surface *screenbuffer = NULL;
 static SDL_Surface *argbbuffer = NULL;
 static SDL_Texture *texture = NULL;
+static SDL_Texture *textureCRT = NULL;
 static SDL_Texture *texture_upscaled = NULL;
 
 static SDL_Rect blit_rect = {
@@ -683,13 +690,14 @@ static void CreateUpscaledTexture(bool force)
     // which looks much softer and smoother than "nearest" but does a better
     // job at downscaling from the upscaled texture to screen.
 
-    SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "linear");
+    Uint32 wU = w_upscale*SCREENWIDTH, hU = h_upscale*SCREENHEIGHT;
 
+    //SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "linear");
     new_texture = SDL_CreateTexture(renderer,
                                 pixel_format,
                                 SDL_TEXTUREACCESS_TARGET,
-                                w_upscale*SCREENWIDTH,
-                                h_upscale*SCREENHEIGHT);
+                                wU,
+                                hU);
 
     old_texture = texture_upscaled;
     texture_upscaled = new_texture;
@@ -698,6 +706,29 @@ static void CreateUpscaledTexture(bool force)
     {
         SDL_DestroyTexture(old_texture);
     }
+
+    if(textureCRT != NULL) SDL_DestroyTexture(textureCRT);
+    //SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "linear");
+    textureCRT = SDL_CreateTexture(renderer,
+                                pixel_format,
+                                SDL_TEXTUREACCESS_STREAMING,
+                                wU,hU);
+
+    if(video != NULL) free(video);
+    video = (unsigned char *) malloc((wU * hU) * sizeof(int));
+    crt_init(&crt, wU, hU, CRT_PIX_FORMAT_RGBA, video);
+
+    crt.blend = 1;
+    crt.scanlines = 1;
+    crt.saturation = 20;
+
+    ntsc.format = CRT_PIX_FORMAT_RGBA;
+    ntsc.w = wU;
+    ntsc.h = hU;
+    ntsc.as_color = 1;
+    ntsc.raw = 0;
+    ntsc.hue = 0;
+    ntsc.frame = 0;
 }
 
 //
@@ -791,7 +822,7 @@ void I_FinishUpdate (void)
 
     // Update the intermediate texture with the contents of the RGBA buffer.
 
-    SDL_UpdateTexture(texture, NULL, argbbuffer->pixels, argbbuffer->pitch);
+    //SDL_UpdateTexture(texture, NULL, argbbuffer->pixels, argbbuffer->pitch);
 
     // Make sure the pillarboxes are kept clear each frame.
 
@@ -800,13 +831,28 @@ void I_FinishUpdate (void)
     // Render this intermediate texture into the upscaled texture
     // using "nearest" integer scaling.
 
-    SDL_SetRenderTarget(renderer, texture_upscaled);
-    SDL_RenderCopy(renderer, texture, NULL, NULL);
+    // SDL_SetRenderTarget(renderer, textureCRT);
+    // SDL_RenderCopy(renderer, texture, NULL, NULL);
+
+    
+    // CRT
+
+    ntsc.data = (unsigned char*) argbbuffer->pixels;
+    ntsc.w = argbbuffer->w;
+    ntsc.h = argbbuffer->h;
+    crt_modulate(&crt, &ntsc);
+    crt_demodulate(&crt, 0);
+    ntsc.field = !ntsc.field;
+    SDL_Point size;
+    SDL_QueryTexture(textureCRT, NULL, NULL, &size.x, &size.y);
+    SDL_UpdateTexture(textureCRT, NULL, video, size.x * sizeof(Uint32));
+
+    // SDL_SetRenderTarget(renderer, textureCRT);
+    // SDL_RenderCopy(renderer, texture, NULL, NULL);
 
     // Finally, render this upscaled texture to screen using linear scaling.
-
     SDL_SetRenderTarget(renderer, NULL);
-    SDL_RenderCopy(renderer, texture_upscaled, NULL, NULL);
+    SDL_RenderCopy(renderer, textureCRT, NULL, NULL);
 
     // Draw!
 
@@ -1387,6 +1433,7 @@ static void SetVideoMode(void)
     // Initially create the upscaled texture for rendering to screen
 
     CreateUpscaledTexture(true);
+
 }
 
 void I_InitGraphics(uint8_t *pal)
