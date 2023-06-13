@@ -436,7 +436,7 @@ MUS_Init(
             #endif // _WIN32
             
             #ifdef __linux__
-            music_device = &mus_device_alsa;
+            music_device = &mus_device_fs;
             #endif // __linux__
             
             #ifdef __APPLE__

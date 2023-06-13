@@ -59,11 +59,13 @@ add_executable(${CMAKE_PROJECT_NAME}
     src/mpuapi.cpp
     src/mputsf.cpp
     src/mpualsa.cpp
+    src/mpufluid.cpp
     src/mpucore.cpp
 )
 if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
     find_package(ALSA REQUIRED)
     target_link_libraries(raptor
+        fluidsynth
         textscreen
         asound
         SDL2::SDL2
