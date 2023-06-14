@@ -57,6 +57,8 @@ int FS_Init(int option)
     }
  
     fluid_settings_setstr(settings, "audio.driver", "sdl2");
+    fluid_settings_setint(settings, "synth.polyphony", 512);
+    fluid_settings_setint(settings, "synth.threadsafe-api", 0);
 
     /* Create the audio driver. As soon as the audio driver is
      * created, the synthesizer can be played. */
