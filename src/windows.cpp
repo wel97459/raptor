@@ -191,6 +191,7 @@ WIN_Opts(
 )
 {
     SWD_DLG dlg;
+    int song = FILE058_HANGAR_MUS;
     int x, y, lx, ly;
     int kbactive, patchflag, curd, cur_field;
     int new_vol;
@@ -273,6 +274,12 @@ WIN_Opts(
                 dlg.keypress = SC_ENTER;
                 JOY_IsKey(AButton);
             }
+
+            if (XButton)
+            {
+                dlg.keypress = SC_R;
+                JOY_IsKey(XButton);
+            }
         }
         
         switch (dlg.keypress)
@@ -341,6 +348,13 @@ WIN_Opts(
                 dlg.cur_act = S_FLD_COMMAND;
                 dlg.cur_cmd = F_SELECT;
                 dlg.field = OPTS_DETAIL;
+            }
+            break;
+        case SC_R :
+            song++;
+            SND_PlaySong(song, 1, 1);
+            if(song == FILE061_APOGEE_MUS){
+                song=FILE058_HANGAR_MUS;
             }
             break;
         }
