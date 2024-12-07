@@ -102,8 +102,22 @@ int video_display = 0;
 
 // Screen width and height, from configuration file.
 
+#ifdef __NDS__
+int window_width = 320;
+int window_height = 200;
+#elif __3DS__
+int window_width = 320;
+int window_height = 200;
+#elif __SWITCH__
+int window_width = 1280;
+int window_height = 720;
+#elif XBOX
+int window_width = 640;
+int window_height = 480;
+#else
 int window_width = 800;
 int window_height = 600;
+#endif
 
 // Fullscreen mode, 0x0 for SDL_WINDOW_FULLSCREEN_DESKTOP.
 

@@ -6,3 +6,9 @@ Makefile
 bin
 build
 .vscode
+*.nsp
+*.nro
+*.elf
+*.nacp
+romfs/*
+!romfs/SETUP.INI

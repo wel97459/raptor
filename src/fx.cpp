@@ -95,7 +95,7 @@ SND_InitSound(
     spec.freq = fx_freq;
     spec.format = AUDIO_S16SYS;
     spec.channels = 2;
-    spec.samples = 512;
+    spec.samples = 1024;
     spec.callback = FX_Fill;
     spec.userdata = NULL;
 

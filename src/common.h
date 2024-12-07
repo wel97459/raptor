@@ -1,6 +1,11 @@
 #pragma once
 #include <stdlib.h>
 
+#ifdef __ARM__
+#include "arm.h"
+#endif
+
+
 static inline void EXIT_Error(const char *a1, ...)
 {
      exit(0);

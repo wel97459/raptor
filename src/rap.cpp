@@ -197,7 +197,15 @@ InitScreen(
     void
 )
 {
+    #ifdef __3DS__
+    printf(" RAPTOR: Call Of The Shadows V1.2\n (c)1994 Cygnus Studios\n");
+    #elif __SWITCH__
     printf(" RAPTOR: Call Of The Shadows V1.2                        (c)1994 Cygnus Studios\n");
+    #elif XBOX
+    printf(" RAPTOR: Call Of The Shadows V1.2       (c)1994 Cygnus Studios\n");
+    #else
+    printf(" RAPTOR: Call Of The Shadows V1.2                        (c)1994 Cygnus Studios\n");
+    #endif
 }
 
 /*==========================================================================
@@ -1250,25 +1258,47 @@ main(
 
     var1 = getenv("S_HOST");
 
+    #if defined (__ARM__)
+    sys_init();
+    #endif
+
     InitScreen();
 
     RAP_InitLoadSave();
-    
-#if _WIN32 || __linux__ || __APPLE__
-    if (access(RAP_SetupFilename(), 0))
-    {
-        INI_InitPreference(RAP_SetupFilename());
-        RAP_WriteDefaultSetup();
-    }
-#else
-    if (access(RAP_SetupFilename(), 0))
-    {
-        printf("\n\n** You must run SETUP first! **\n");
-        SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,
-            "Raptor", "** You must run SETUP first! **", NULL);
-        exit(0);
-    }
-#endif //_WIN32 || __linux__ || __APPLE__
+
+    #if __3DS__ || __SWITCH__
+        if (access(RAP_SetupFilename(), 0))
+        {
+            printf("\n\n** You must run SETUP first! **\n");
+            cp(RAP_SD_DIR "SETUP.INI", ROMFS "SETUP.INI");
+        }
+    #elif __NDS__
+        if (access(RAP_SetupFilename(), 0))
+        {
+            printf("\n\n** You must run SETUP first! **\n");
+            cp(RAP_SD_DIR "SETUP.INI", ROMFS "SETUP.INI");
+        }
+    #elif XBOX
+        if (access(RAP_SetupFilename(), 0))
+        {
+            printf("\n\n** You must run SETUP first! **\n");
+            CopyFileA(XBOX_DVD_DIR "SETUP.INI", XBOX_HDD_DIR "SETUP.INI", NULL);
+        }
+    #elif _WIN32 || __linux__ || __APPLE__
+        if (access(RAP_SetupFilename(), 0))
+        {
+            INI_InitPreference(RAP_SetupFilename());
+            RAP_WriteDefaultSetup();
+        }
+    #else
+        if (access(RAP_SetupFilename(), 0))
+        {
+            printf("\n\n** You must run SETUP first! **\n");
+            SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,
+                "Raptor", "** You must run SETUP first! **", NULL);
+            exit(0);
+        }
+    #endif
 
     godmode = 0;
 
@@ -1324,13 +1354,37 @@ main(
             numfiles++;
     }
 
-    if (access("FILE0000.GLB", 0) && !RAP_CheckFileInPath("FILE0000.GLB") || !numfiles)
-    {
-        printf("All game data files NOT FOUND cannot proceed !!\n");
-        SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,
-            "Raptor", "All game data files NOT FOUND cannot proceed !!", NULL);
-        exit(0);
-    }
+    #if defined (__NDS__) || defined (__3DS__) || defined (__SWITCH__)
+        if (access(ROMFS "FILE0000.GLB", 0) || !numfiles)
+        {
+            printf("All game data files NOT FOUND cannot proceed !!\n");
+            //SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,
+            //    "Raptor", "All game data files NOT FOUND cannot proceed !!", NULL);
+            //exit(0);
+        }
+    #elif __NDS__
+        if (access(ROMFS "FILE0000.GLB", 0) || !numfiles)
+        {
+            printf("All game data files NOT FOUND cannot proceed !!\n");
+            //exit(0);
+        }
+    #elif XBOX
+        if (access(XBOX_DVD_DIR "FILE0000.GLB", 0) || !numfiles)
+        {
+            printf("All game data files NOT FOUND cannot proceed !!\n");
+            SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,
+                "Raptor", "All game data files NOT FOUND cannot proceed !!", NULL);
+            //exit(0);
+        }
+    #else
+        if (access("FILE0000.GLB", 0) || !numfiles)
+        {
+            printf("All game data files NOT FOUND cannot proceed !!\n");
+            SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,
+                "Raptor", "All game data files NOT FOUND cannot proceed !!", NULL);
+            exit(0);
+        }
+    #endif
     
     printf("Init -\n");
     EXIT_Install(ShutDown);

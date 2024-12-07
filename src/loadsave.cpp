@@ -46,8 +46,16 @@ int map_item = -1;
 int curplr_diff = 2;
 int srwpos = 0;
 
-static const char *fmt = "CHAR%04u.FIL";
-static const char *cdfmt = "%sCHAR%04u.FIL";
+#if defined (__NDS__) || defined (__3DS__) || defined (__SWITCH__)
+    static const char *fmt = RAP_SD_DIR "CHAR%04u.FIL";
+    static const char* cdfmt = RAP_SD_DIR "%s\\CHAR%04u.FIL";
+#elif defined (XBOX)
+    static const char *fmt = XBOX_HDD_DIR "CHAR%04u.FIL";
+    static const char* cdfmt = XBOX_HDD_DIR "%s\\CHAR%04u.FIL";
+#else
+    static const char *fmt = "CHAR%04u.FIL";
+    static const char* cdfmt = "%s\\CHAR%04u.FIL";
+#endif
 
 MAZELEVEL *mapmem;
 CSPRITE *csprite;
@@ -971,7 +979,13 @@ RAP_InitLoadSave(
 
     cdflag = 0;
 
-    strcpy(g_setup_ini, "SETUP.INI");
+    #if defined (__NDS__) || defined (__3DS__) || defined (__SWITCH__)
+        strcpy(g_setup_ini, RAP_SD_DIR "SETUP.INI");
+    #elif XBOX
+        strcpy(g_setup_ini, XBOX_HDD_DIR "SETUP.INI");
+    #else
+        strcpy(g_setup_ini, "SETUP.INI");
+    #endif
 
     return cdpath;
 #endif // _WIN32 || __linux__ || __APPLE__

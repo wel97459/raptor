@@ -173,22 +173,35 @@ GLB_FindFile(
 	* create a file name and attempt to open it local first, then if it
 	* fails use the exe path and try again.
 	*/
-	sprintf(filename, "%s%04u.GLB", prefix, filenum);
-	if ((handle = fopen(filename, permissions)) == NULL)
-	{
-		sprintf(filename, "%s%s%04u.GLB", exePath, prefix, filenum);
-		
+	int lookat = 0;
+	char *lookin[] = {
+		"",
+		exePath,
+		#ifdef __SWITCH__
+		ROMFS,
+		RAP_SD_DIR,
+		#endif
+		NULL
+	};
+
+	while(lookin[lookat] != NULL){
+		sprintf(filename, "%s%s%04u.GLB", lookin[lookat], prefix, filenum);
+		lookat++;
 		if ((handle = fopen(filename, permissions)) == NULL)
 		{
-			if (return_on_failure)
-				return NULL;
+			if(lookin[lookat] == NULL){
+				if (return_on_failure)
+					return NULL;
 
-			sprintf(filename, "%s%04u.GLB", prefix, filenum);
-			EXIT_Error("GLB_FindFile: %s, Error #%d,%s",
-				filename, errno, strerror(errno));
+				sprintf(filename, "%s%04u.GLB", prefix, filenum);
+				EXIT_Error("GLB_FindFile: %s, Error #%d,%s",
+					filename, errno, strerror(errno));
+			}
+		} else {
+			break;
 		}
 	}
-	
+
 	/*
 	* Keep file handle
 	*/
@@ -346,7 +359,11 @@ GLB_UseVM(
 	void
 )
 {
+	#ifdef __ARM__
+	fVmem = 0;
+	#else
 	fVmem = 1;
+	#endif
 }
 
 /*************************************************************************
