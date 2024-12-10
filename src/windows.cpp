@@ -192,6 +192,7 @@ WIN_Opts(
 {
     SWD_DLG dlg;
     int sf = 0;
+    int song = FILE058_HANGAR_MUS;
     int x, y, lx, ly;
     int kbactive, patchflag, curd, cur_field;
     int new_vol;
@@ -279,6 +280,12 @@ WIN_Opts(
             {
                 dlg.keypress = SC_F;
                 JOY_IsKey(YButton);
+            }
+            
+            if (XButton)
+            {
+                dlg.keypress = SC_R;
+                JOY_IsKey(XButton);
             }
         }
         
@@ -368,6 +375,12 @@ sf_goback:
                     sf=0;
                     if(strcmp("SoundFont0",perfName) != 0) goto sf_goback;
                 }
+            }
+        case SC_R :
+            song++;
+            SND_PlaySong(song, 1, 1);
+            if(song == FILE061_APOGEE_MUS){
+                song=FILE058_HANGAR_MUS;
             }
             break;
         }
