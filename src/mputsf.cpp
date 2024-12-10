@@ -12,7 +12,7 @@
 #include "musapi.h"
 #include "prefapi.h"
 
-static tsf* g_TinySoundFont;
+tsf* g_TinySoundFont;
 
 /***************************************************************************
 AudioCallback() -
@@ -23,7 +23,9 @@ AudioCallback(
     int len
 )
 {
-    tsf_render_short(g_TinySoundFont, (short*)stream, len, 0);
+    if (g_TinySoundFont != NULL){
+        tsf_render_short(g_TinySoundFont, (short*)stream, len, 0);
+    }
 }
 
 /***************************************************************************
@@ -37,6 +39,7 @@ TSF_Init(
     char fn[128];
 
     INI_GetPreference("Setup", "SoundFont", fn, 127, "TimGM6mb.sf2");
+
     // Load the SoundFont from a file
 
     g_TinySoundFont = tsf_load_filename(fn);
@@ -69,6 +72,7 @@ TSF_DeInit(
 ) 
 {
     tsf_close(g_TinySoundFont);
+    g_TinySoundFont = NULL;
 }
 
 /***************************************************************************

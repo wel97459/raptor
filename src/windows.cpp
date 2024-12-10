@@ -191,6 +191,7 @@ WIN_Opts(
 )
 {
     SWD_DLG dlg;
+    int sf = 0;
     int x, y, lx, ly;
     int kbactive, patchflag, curd, cur_field;
     int new_vol;
@@ -273,6 +274,12 @@ WIN_Opts(
                 dlg.keypress = SC_ENTER;
                 JOY_IsKey(AButton);
             }
+
+            if (YButton)
+            {
+                dlg.keypress = SC_F;
+                JOY_IsKey(YButton);
+            }
         }
         
         switch (dlg.keypress)
@@ -341,6 +348,26 @@ WIN_Opts(
                 dlg.cur_act = S_FLD_COMMAND;
                 dlg.cur_cmd = F_SELECT;
                 dlg.field = OPTS_DETAIL;
+            }
+            break;
+        case SC_F:
+            if(g_TinySoundFont){
+                char perf[127];
+                char perfName[127];
+sf_goback:                
+                sprintf(perfName, "SoundFont%i", sf);
+                sf++;
+                INI_GetPreference("Setup", perfName, perf, 127, "NULL");
+                if(strcmp("NULL", perf) != 0){
+                    INI_PutPreference("Setup", "SoundFont", perf);
+                    //mus_device_tsf.DeInit();
+                    SND_FadeOutSong();
+                    mus_device_tsf.Init(0);
+                    SND_PlaySong(FILE057_MAINMENU_MUS, 1, 1);
+                }else{
+                    sf=0;
+                    if(strcmp("SoundFont0",perfName) != 0) goto sf_goback;
+                }
             }
             break;
         }

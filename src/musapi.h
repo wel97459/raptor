@@ -1,6 +1,7 @@
 #pragma once
 #include <stdint.h>
 #include "common.h"
+#include "tsf.h"
 
 struct musdevice_t {
     int (*Init)(int option);
@@ -18,7 +19,7 @@ struct musdevice_t {
 extern int music_samplesperloop;
 extern musdevice_t mus_device_opl, mus_device_winmm, mus_device_tsf, mus_device_alsa, mus_device_corea, mus_device_corem;
 extern musdevice_t *music_device;
-
+extern tsf *g_TinySoundFont;
 
 int MUS_Init(int card, int option);
 void MUS_DeInit(void);

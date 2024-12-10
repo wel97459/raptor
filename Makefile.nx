@@ -47,7 +47,7 @@ ROMFS		:=	romfs
 APP_TITLE   := Raptor NX V0.8.0
 APP_AUTHOR  := github.com/WEL97459
 APP_VERSION := 080
-APP_TITLEID := 4200000CA118A908
+APP_TITLEID := 01e3ed80c4390000
 ICON   	    := rsrc/raptor.jpg
 
 #---------------------------------------------------------------------------------
