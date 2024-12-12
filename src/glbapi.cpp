@@ -32,6 +32,7 @@ char* strupr(char* s)
 
 #define _SCOTTGAME
 
+
 static const char* serial = "32768GLB";
 static char exePath[PATH_MAX];
 static int num_glbs;
@@ -39,6 +40,18 @@ static KEYFILE g_key;
 static char prefix[5] = "FILE";
 static bool fVmem = 0;
 
+//This is the list of loctions to look for files in.
+static const char *lookNdirs[] = {
+	"",
+	exePath,
+	"soundfonts/",
+	#ifdef __SWITCH__
+	ROMFS,
+	RAP_SD_DIR,
+	RAP_SD_DIR "soundfonts/",
+	#endif
+	NULL
+};
 /*
 * define file descriptor used to access file.
 */
@@ -174,22 +187,13 @@ GLB_FindFile(
 	* fails use the exe path and try again.
 	*/
 	int lookat = 0;
-	char *lookin[] = {
-		"",
-		exePath,
-		#ifdef __SWITCH__
-		ROMFS,
-		RAP_SD_DIR,
-		#endif
-		NULL
-	};
 
-	while(lookin[lookat] != NULL){
-		sprintf(filename, "%s%s%04u.GLB", lookin[lookat], prefix, filenum);
+	while(lookNdirs[lookat] != NULL){
+		sprintf(filename, "%s%s%04u.GLB", lookNdirs[lookat], prefix, filenum);
 		lookat++;
 		if ((handle = fopen(filename, permissions)) == NULL)
 		{
-			if(lookin[lookat] == NULL){
+			if(lookNdirs[lookat] == NULL){
 				if (return_on_failure)
 					return NULL;
 
@@ -916,4 +920,42 @@ GLB_SaveFile(
 	}
 	
 	fclose(handle);
+}
+
+/***************************************************************************
+ * GLB_FindFilePath() - Finds the path to a filename by searching in multiple directories.
+ *
+ * This function iterates through the 'lookNdirs' array and tries to open each file path.
+ * The first path that is successfully opened is returned as a dynamically allocated string.
+ ***************************************************************************/
+char *
+GLB_FindFilePath(
+    char *file
+)
+{
+	const char* routine = "GLB_FindFile";
+	char filename[PATH_MAX];
+
+	FILE *handle;
+
+	int lookat = 0;
+
+	while(lookNdirs[lookat] != NULL){
+		sprintf(filename, "%s%s%", lookNdirs[lookat], file);
+		lookat++;
+		if ((handle = fopen(filename, "r")) == NULL)
+		{
+			if(lookNdirs[lookat] == NULL)
+				return NULL;
+			
+		} else {
+			fclose(handle);
+			break;
+		}
+	}
+
+	char * retChar = (char*)malloc(strlen(filename)+1 * sizeof(char));
+	strcpy(retChar, filename);
+
+	return retChar;
 }
