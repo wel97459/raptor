@@ -191,7 +191,6 @@ WIN_Opts(
 )
 {
     SWD_DLG dlg;
-    int sf = 0;
     int song = FILE058_HANGAR_MUS;
     int x, y, lx, ly;
     int kbactive, patchflag, curd, cur_field;
@@ -361,21 +360,27 @@ WIN_Opts(
             if(g_TinySoundFont){
                 char perf[127];
                 char perfName[127];
+                int sf = INI_GetPreferenceLong("SoundFonts", "CurrentFont", 0);
 sf_goback:                
                 sprintf(perfName, "SoundFont%i", sf);
                 sf++;
-                INI_GetPreference("Setup", perfName, perf, 127, "NULL");
+                INI_GetPreference("SoundFonts", perfName, perf, 127, "NULL");
                 if(strcmp("NULL", perf) != 0){
-                    INI_PutPreference("Setup", "SoundFont", perf);
-                    //mus_device_tsf.DeInit();
+                    INI_PutPreference("SoundFonts", "SoundFont", perf);
                     SND_FadeOutSong();
+                    pthread_mutex_lock(&mutexAudio);
+                    mus_device_tsf.DeInit();
                     mus_device_tsf.Init(0);
-                    SND_PlaySong(FILE057_MAINMENU_MUS, 1, 1);
+                    pthread_mutex_unlock(&mutexAudio);
+                    SND_PlaySong(song, 1, 1);
+                    WIN_Msg(perf);
                 }else{
                     sf=0;
                     if(strcmp("SoundFont0",perfName) != 0) goto sf_goback;
                 }
+                INI_PutPreferenceLong("SoundFonts", "CurrentFont", sf);
             }
+            break;
         case SC_R :
             song++;
             SND_PlaySong(song, 1, 1);
