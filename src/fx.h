@@ -1,5 +1,7 @@
 #pragma once
 
+#include "pthread.h"
+
 #define SND_CLOSE    40
 #define SND_FAR      500
 
@@ -69,6 +71,7 @@ extern int dig_flag;
 extern int fx_freq;
 extern int fx_gus;
 extern int sys_midi, winmm_mpu_device, core_dls_synth, core_midi_port, alsaclient, alsaport;
+extern pthread_mutex_t mutexAudio;
 
 int SND_InitSound(void);
 void SND_DeInit(void);

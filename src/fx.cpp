@@ -26,6 +26,8 @@ int fx_gus;
 int fx_channels;
 int sys_midi, winmm_mpu_device, core_dls_synth, core_midi_port, alsaclient, alsaport;
 
+pthread_mutex_t mutexAudio = PTHREAD_MUTEX_INITIALIZER;
+
 typedef struct
 {
     int item;         // GLB ITEM
@@ -66,12 +68,14 @@ FX_Fill(
     int len
 )
 {
+    pthread_mutex_lock(&mutexAudio);
     memset(stream, 0, len);
     int16_t *stream16 = (int16_t*)stream;
     len /= 4;
     MUS_Mix(stream16, len);
     GSS_Mix(stream16, len);
     DSP_Mix(stream16, len);
+    pthread_mutex_unlock(&mutexAudio);
 }
 
 /***************************************************************************
