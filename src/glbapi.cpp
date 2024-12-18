@@ -38,6 +38,13 @@ static int num_glbs;
 static char prefix[5] = "FILE";
 static bool fVmem = 0;
 
+//This is the list of loctions to look for files in.
+static const char *lookNdirs[] = {
+	"",
+	exePath,
+	"soundfonts/",
+	NULL
+};
 /*
 * define file descriptor used to access file.
 */
@@ -245,7 +252,7 @@ GLB_OpenFile(
 /*------------------------------------------------------------------------
    GLB_CloseFiles() - Closes all cached files.
  ------------------------------------------------------------------------*/
-static void
+void
 GLB_CloseFiles(
 	void
 )
@@ -809,7 +816,6 @@ GLB_FreeAll(
 			ii++;
 		}
 	}
-	GLB_CloseFiles();
 }
 
 /***************************************************************************
@@ -921,7 +927,6 @@ GLB_FindFilePath(
 	FILE *handle;
 
 	int lookat = 0;
-	char lookNdirs[] = {"test"};
 	
 	while(lookNdirs[lookat] != NULL){
 		sprintf(filename, "%s%s", lookNdirs[lookat], file);
