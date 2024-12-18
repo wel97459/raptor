@@ -200,7 +200,7 @@ InitScreen(
     #ifdef __3DS__
     printf(" RAPTOR: Call Of The Shadows V1.2\n (c)1994 Cygnus Studios\n");
     #elif __SWITCH__
-    printf(" RAPTOR: Call Of The Shadows V1.2                        (c)1994 Cygnus Studios\n");
+    printf("RAPTOR: Call Of The Shadows V1.2                         (c)1994 Cygnus Studios\n");
     #elif XBOX
     printf(" RAPTOR: Call Of The Shadows V1.2       (c)1994 Cygnus Studios\n");
     #else
@@ -1258,12 +1258,11 @@ main(
 
     var1 = getenv("S_HOST");
 
-    #if defined (__ARM__)
+    #ifdef __ARM__
     sys_init();
     #endif
 
     InitScreen();
-
     RAP_InitLoadSave();
 
     #if __3DS__ || __SWITCH__
@@ -1337,7 +1336,7 @@ main(
     if (!access("FILE0002.GLB", 0) || RAP_CheckFileInPath("FILE0002.GLB"))
         gameflag[1] = 1;
     
-    if (!access("FILE0003.GLB", 0) && !access("FILE0004.GLB", 0) || RAP_CheckFileInPath("FILE0003.GLB") && RAP_CheckFileInPath("FILE0004.GLB"))
+    if ((!access("FILE0003.GLB", 0) && !access("FILE0004.GLB", 0)) || (RAP_CheckFileInPath("FILE0003.GLB") && RAP_CheckFileInPath("FILE0004.GLB")))
     {
         gameflag[2] = 1;
         gameflag[3] = 1;
@@ -1438,7 +1437,10 @@ main(
     if (!INI_InitPreference(RAP_SetupFilename()))
         EXIT_Error("SETUP Error");
 
+    #ifndef __SWITCH__
     fflush(stdout);
+    #endif
+
     KBD_Install();
     GFX_InitSystem();
     SWD_Install(0);
@@ -1450,14 +1452,18 @@ main(
     {
     default:
         printf("PTR_Init()-Auto\n");
+        #ifndef __SWITCH__
         fflush(stdout);
+        #endif
         ptrflag = PTR_Init(P_MOUSE);
         usekb_flag = 1;
         break;
         
     case I_JOYSTICK:
         printf("PTR_Init()-Joystick\n");
+        #ifndef __SWITCH__
         fflush(stdout);
+        #endif
         ptrflag = PTR_Init(P_JOYSTICK);
         if (joy_ipt_MenuNew)
             usekb_flag = 1;
@@ -1467,7 +1473,9 @@ main(
     
     case I_MOUSE:
         printf("PTR_Init()-Mouse\n");
+        #ifndef __SWITCH__
         fflush(stdout);
+        #endif
         ptrflag = PTR_Init(P_MOUSE);
         usekb_flag = 0;
         break;
@@ -1476,7 +1484,9 @@ main(
     if (reg_flag)
     {
         printf("Registered EXE!\n");
+        #ifndef __SWITCH__
         fflush(stdout);
+        #endif
     }
     
 #if _WIN32 || __linux__ || __APPLE__
@@ -1497,7 +1507,7 @@ main(
     GLB_FreeAll();
     RAP_InitMem();
     
-    printf("Loading Graphics\n");
+    printf("Loading Graphics: ");
     
     pal = GLB_LockItem(FILE100_PALETTE_DAT);
     memset(pal, 0, 3);
@@ -1505,7 +1515,9 @@ main(
     SHADOW_Init();
     FLAME_Init();
     
+    #ifndef __SWITCH__
     fflush(stdout);
+    #endif
     
     if (ptrflag)
     {
@@ -1546,6 +1558,8 @@ main(
         numbers[loop] = (char*)GLB_LockItem(item);
     }
 
+    printf("Done!\n");
+
     FLAME_InitShades();
     HELP_Init();
     OBJS_Init();
@@ -1557,9 +1571,11 @@ main(
     SND_Setup();
     
     GFX_SetPalRange(0, ROTPAL_START - 1);
+    #ifdef __SWITCH__
+    sys_deinit();
+    #endif
     GFX_InitVideo(palette);
     SHADOW_MakeShades();
-    
     RAP_ClearPlayer();
     
     if (!godmode)

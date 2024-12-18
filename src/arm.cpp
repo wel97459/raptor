@@ -1,11 +1,11 @@
 #ifdef __ARM__
-#include "arm.h"
-#include <dirent.h>
-#include <fcntl.h>
-#include <unistd.h>
 #include <errno.h>
 #include <cstdio>
-
+#include <dirent.h>
+#include <fcntl.h>
+#include "arm.h"
+#include <unistd.h>
+static int consoleValid = 0;
 //Generic file copy function.
 int cp(const char *to, const char *from)
 {
@@ -133,7 +133,9 @@ void sys_init()
 
 #elif __SWITCH__
 
-    //consoleInit(NULL); //Broken?
+    consoleInit(NULL); //Broken?
+    consoleClear();
+    consoleValid = 1;
 
     romfsInit();
 
@@ -148,4 +150,30 @@ void sys_init()
 
 #endif
 }
+#ifdef __SWITCH__
+void switchPrintf(const char *fmt, ...)
+{
+    if (!consoleValid){
+        fflush(stdout);
+        return;
+    }
+
+    va_list args;
+    va_start(args, fmt);
+    vprintf(fmt, args);
+    va_end(args);
+    consoleUpdate(NULL);
+}
+#endif
+
+void sys_deinit()
+{
+    #ifdef __SWITCH__
+    if (!consoleValid) return;
+    consoleUpdate(NULL);
+    consoleExit(NULL);
+    consoleValid = 0;
+    #endif
+}
+
 #endif

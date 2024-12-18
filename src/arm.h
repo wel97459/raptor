@@ -20,9 +20,13 @@ int cp(const char *to, const char *from);
 int checkFile(const char* path, int mode);
 #endif
 
+#ifdef __SWITCH__
+void switchPrintf(const char *fmt, ...);
+#endif
+
 //Init the target system
 void sys_init();
-
+void sys_deinit();
 #define access checkFile
 
 #ifdef __NDS__
@@ -34,8 +38,10 @@ void sys_init();
 #define SDMC "sdmc:/"
 #define RAP_SD_DIR SDMC "3ds/Raptor/"
 #elif __SWITCH__
+
 #define ROMFS "romfs:/"
 #define SDMC "sdmc:/"
 #define RAP_SD_DIR SDMC "switch/Raptor/"
+#define printf switchPrintf
 #endif
 #endif
