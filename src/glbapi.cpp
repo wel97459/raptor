@@ -259,7 +259,7 @@ GLB_OpenFile(
 /*------------------------------------------------------------------------
    GLB_CloseFiles() - Closes all cached files.
  ------------------------------------------------------------------------*/
-static void
+void
 GLB_CloseFiles(
 	void
 )
@@ -938,7 +938,7 @@ GLB_FindFilePath(
 	FILE *handle;
 
 	int lookat = 0;
-
+	
 	while(lookNdirs[lookat] != NULL){
 		sprintf(filename, "%s%s", lookNdirs[lookat], file);
 		lookat++;
