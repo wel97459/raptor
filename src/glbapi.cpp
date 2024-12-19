@@ -152,7 +152,7 @@ GLB_FindFile(
 	const char *permissions		     // INPUT : file access permissions
 )
 {
-	char filename[PATH_MAX];
+	char *filename;
 	FILE *handle;
 	FILEDESC* fd;
 	
@@ -171,22 +171,23 @@ GLB_FindFile(
 	* create a file name and attempt to open it local first, then if it
 	* fails use the exe path and try again.
 	*/
-	sprintf(filename, "%s%04u.GLB", prefix, filenum);
-	if ((handle = fopen(filename, permissions)) == NULL)
-	{
-		sprintf(filename, "%s%s%04u.GLB", exePath, prefix, filenum);
-		
-		if ((handle = fopen(filename, permissions)) == NULL)
-		{
-			if (return_on_failure)
-				return NULL;
+	int lookat = 0;
+	char *name = (char*)malloc((strlen(prefix)+9) * sizeof(char));
+	sprintf(name, "%s%04u.GLB", prefix, filenum);
+	filename = GLB_FindFilePath(name);
 
-			sprintf(filename, "%s%04u.GLB", prefix, filenum);
-			EXIT_Error("GLB_FindFile: %s, Error #%d,%s",
-				filename, errno, strerror(errno));
+	if(filename == NULL){
+		if (return_on_failure){
+			free(name);
+			return NULL;
 		}
+
+		EXIT_Error("GLB_FindFile: %s, Error #%d,%s", name, errno, strerror(errno));
 	}
-	
+	free(name);
+
+	handle = fopen(filename, permissions);
+
 	/*
 	* Keep file handle
 	*/
@@ -196,8 +197,11 @@ GLB_FindFile(
 	fd->permissions = permissions;
 	fd->handle = handle;
 
+	free(filename);
+
 	return handle;
 }
+
 
 /*------------------------------------------------------------------------
    GLB_OpenFile() - Opens & Caches file handle
@@ -241,7 +245,7 @@ GLB_OpenFile(
 /*------------------------------------------------------------------------
    GLB_CloseFiles() - Closes all cached files.
  ------------------------------------------------------------------------*/
-void
+static void
 GLB_CloseFiles(
 	void
 )
@@ -935,6 +939,8 @@ GLB_FindFilePath(
 
 	char * retChar = (char*)malloc(strlen(filename)+1 * sizeof(char));
 	strcpy(retChar, filename);
+	
+	printf("Found: %s\n", filename);
 
 	return retChar;
 }
