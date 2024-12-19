@@ -185,7 +185,6 @@ GLB_FindFile(
 	* create a file name and attempt to open it local first, then if it
 	* fails use the exe path and try again.
 	*/
-	int lookat = 0;
 	char *name = (char*)malloc((strlen(prefix)+9) * sizeof(char));
 	sprintf(name, "%s%04u.GLB", prefix, filenum);
 	filename = GLB_FindFilePath(name);
@@ -338,7 +337,7 @@ GLB_LoadIDT(
 
 		flen = fread(key, sizeof(KEYFILE), k, handle);
 		
-		for (n = 0; n < k; n++)
+		for (n = 0; n < flen; n++)
 		{
 #ifdef _SCOTTGAME
 			GLB_DeCrypt(serial, (void*)&key[n], sizeof(KEYFILE));
