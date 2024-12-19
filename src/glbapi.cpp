@@ -8,6 +8,7 @@
 #include "common.h"
 #include "glbapi.h"
 #include "vmemapi.h"
+#include "fileids.h"
 
 #ifdef _WIN32
 #include <io.h>
@@ -495,7 +496,7 @@ GLB_FetchItem(
 	ITEM_H itm;
 	ITEMINFO* ii;
 
-	if (handle == ((uint32_t)~0))
+	if (handle == FILE_NULL)
 	{
 		EXIT_Error("GLB_FetchItem: empty handle.");
 		return NULL;
@@ -603,7 +604,7 @@ GLB_UnlockItem(
 	ITEM_H itm;
 	ITEMINFO* ii;
 
-	if (handle == ~0)
+	if (handle == FILE_NULL)
 		return;
 
 	itm.handle = handle;
@@ -643,7 +644,7 @@ GLB_IsLabel(
 	ITEM_H itm;
 	ITEMINFO* ii;
 
-	if (handle == ~0)
+	if (handle == FILE_NULL)
 		return 0;
 
 	itm.handle = handle;
@@ -669,7 +670,7 @@ GLB_ReadItem(
 	ITEM_H   itm;
 	ITEMINFO* ii;
 
-	if (handle == ~0)
+	if (handle == FILE_NULL)
 		return;
 
 	ASSERT(mem != NULL);
@@ -704,7 +705,7 @@ GLB_GetItemID(
 
 	ASSERT(in_name != NULL);
 
-	itm.handle = ~0;
+	itm.handle = FILE_NULL;
 	if (*in_name != ' ' && *in_name != '\0')
 	{
 		for (filenum = 0; filenum < num_glbs; filenum++)
@@ -740,7 +741,7 @@ GLB_GetPtr(
 	ITEM_H itm;
 	ITEMINFO* ii;
 
-	if (handle == ~0)
+	if (handle == FILE_NULL)
 		return NULL;
 
 	itm.handle = handle;
@@ -766,7 +767,7 @@ GLB_FreeItem(
 	ITEM_H itm;
 	ITEMINFO* ii;
 
-	if (handle == ~0)
+	if (handle == FILE_NULL)
 		return;
 
 	itm.handle = handle;
@@ -826,7 +827,6 @@ GLB_FreeAll(
 			ii++;
 		}
 	}
-	GLB_CloseFiles();
 }
 
 /***************************************************************************
@@ -840,7 +840,7 @@ GLB_ItemSize(
 	ITEM_H itm;
 	ITEMINFO* ii;
 
-	if (handle == ~0)
+	if (handle == FILE_NULL)
 		return 0;
 
 	itm.handle = handle;
