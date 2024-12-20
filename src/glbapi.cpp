@@ -8,6 +8,7 @@
 #include "common.h"
 #include "glbapi.h"
 #include "vmemapi.h"
+#include "fileids.h"
 
 #ifdef _WIN32
 #include <io.h>
@@ -165,7 +166,7 @@ GLB_FindFile(
 	const char *permissions		     // INPUT : file access permissions
 )
 {
-	char filename[PATH_MAX];
+	char *filename;
 	FILE *handle;
 	FILEDESC* fd;
 	
@@ -185,24 +186,21 @@ GLB_FindFile(
 	* fails use the exe path and try again.
 	*/
 	int lookat = 0;
+	char *name = (char*)malloc((strlen(prefix)+9) * sizeof(char));
+	sprintf(name, "%s%04u.GLB", prefix, filenum);
+	filename = GLB_FindFilePath(name);
 
-	while(lookNdirs[lookat] != NULL){
-		sprintf(filename, "%s%s%04u.GLB", lookNdirs[lookat], prefix, filenum);
-		lookat++;
-		if ((handle = fopen(filename, permissions)) == NULL)
-		{
-			if(lookNdirs[lookat] == NULL){
-				if (return_on_failure)
-					return NULL;
-
-				sprintf(filename, "%s%04u.GLB", prefix, filenum);
-				EXIT_Error("GLB_FindFile: %s, Error #%d,%s",
-					filename, errno, strerror(errno));
-			}
-		} else {
-			break;
+	if(filename == NULL){
+		if (return_on_failure){
+			free(name);
+			return NULL;
 		}
+
+		EXIT_Error("GLB_FindFile: %s, Error #%d,%s", name, errno, strerror(errno));
 	}
+	free(name);
+
+	handle = fopen(filename, permissions);
 
 	/*
 	* Keep file handle
@@ -213,8 +211,11 @@ GLB_FindFile(
 	fd->permissions = permissions;
 	fd->handle = handle;
 
+	free(filename);
+
 	return handle;
 }
+
 
 /*------------------------------------------------------------------------
    GLB_OpenFile() - Opens & Caches file handle
@@ -296,9 +297,8 @@ GLB_NumItems(
 	fseek(handle, 0L, SEEK_SET);
 	
 	if (!fread(&key, sizeof(KEYFILE), 1, handle))
-	{
 		EXIT_Error("GLB_NumItems: Read failed!");
-	}
+	
 
 #ifdef _SCOTTGAME
 	GLB_DeCrypt(serial, (uint8_t*)&key, sizeof(KEYFILE));
@@ -335,7 +335,8 @@ GLB_LoadIDT(
 		if (k > (int)ASIZE(key))
 			k = ASIZE(key);
 
-		flen = fread(key, sizeof(KEYFILE), k, handle);
+		if (!fread(key, sizeof(KEYFILE), k, handle))
+			EXIT_Error("GLB_NumItems: Read failed!");
 		
 		for (n = 0; n < k; n++)
 		{
@@ -449,7 +450,6 @@ GLB_Load(
 {
 	FILE *handle;
 	ITEMINFO* ii;
-	size_t flen;
 	ASSERT(filenum >= 0 && filenum < num_glbs);
 
 	handle = filedesc[filenum].handle;
@@ -469,7 +469,9 @@ GLB_Load(
 		else
 		{
 			fseek(handle, ii->offset, SEEK_SET);
-			flen = fread(inmem, ii->size, 1, handle);
+			if(!fread(inmem, ii->size, 1, handle))
+				EXIT_Error("GLB_Load: Failed to read data\n");
+			
 #ifdef _SCOTTGAME
 			if (ii->flags & ITF_ENCODED)
 			{
@@ -495,11 +497,8 @@ GLB_FetchItem(
 	ITEM_H itm;
 	ITEMINFO* ii;
 
-	if (handle == ((uint32_t)~0))
-	{
+	if (handle == FILE_NULL)
 		EXIT_Error("GLB_FetchItem: empty handle.");
-		return NULL;
-	}
 
 	itm.handle = handle;
 
@@ -603,7 +602,7 @@ GLB_UnlockItem(
 	ITEM_H itm;
 	ITEMINFO* ii;
 
-	if (handle == ~0)
+	if (handle == FILE_NULL)
 		return;
 
 	itm.handle = handle;
@@ -643,7 +642,7 @@ GLB_IsLabel(
 	ITEM_H itm;
 	ITEMINFO* ii;
 
-	if (handle == ~0)
+	if (handle == FILE_NULL)
 		return 0;
 
 	itm.handle = handle;
@@ -669,7 +668,7 @@ GLB_ReadItem(
 	ITEM_H   itm;
 	ITEMINFO* ii;
 
-	if (handle == ~0)
+	if (handle == FILE_NULL)
 		return;
 
 	ASSERT(mem != NULL);
@@ -704,7 +703,7 @@ GLB_GetItemID(
 
 	ASSERT(in_name != NULL);
 
-	itm.handle = ~0;
+	itm.handle = FILE_NULL;
 	if (*in_name != ' ' && *in_name != '\0')
 	{
 		for (filenum = 0; filenum < num_glbs; filenum++)
@@ -740,7 +739,7 @@ GLB_GetPtr(
 	ITEM_H itm;
 	ITEMINFO* ii;
 
-	if (handle == ~0)
+	if (handle == FILE_NULL)
 		return NULL;
 
 	itm.handle = handle;
@@ -766,7 +765,7 @@ GLB_FreeItem(
 	ITEM_H itm;
 	ITEMINFO* ii;
 
-	if (handle == ~0)
+	if (handle == FILE_NULL)
 		return;
 
 	itm.handle = handle;
@@ -840,7 +839,7 @@ GLB_ItemSize(
 	ITEM_H itm;
 	ITEMINFO* ii;
 
-	if (handle == ~0)
+	if (handle == FILE_NULL)
 		return 0;
 
 	itm.handle = handle;
@@ -938,7 +937,7 @@ GLB_FindFilePath(
 	FILE *handle;
 
 	int lookat = 0;
-
+	
 	while(lookNdirs[lookat] != NULL){
 		sprintf(filename, "%s%s", lookNdirs[lookat], file);
 		lookat++;
@@ -955,6 +954,8 @@ GLB_FindFilePath(
 
 	char * retChar = (char*)malloc(strlen(filename)+1 * sizeof(char));
 	strcpy(retChar, filename);
+	
+	printf("Found: %s\n", filename);
 
 	return retChar;
 }

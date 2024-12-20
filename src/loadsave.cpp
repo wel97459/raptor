@@ -36,7 +36,7 @@
 
 #define MAX_SAVE  10
 
-char cdpath[PATH_MAX];
+char cdpath[PATH_MAX>>2];
 char g_setup_ini[PATH_MAX];
 
 int cdflag = 0;
@@ -47,14 +47,14 @@ int curplr_diff = 2;
 int srwpos = 0;
 
 #if defined (__NDS__) || defined (__3DS__) || defined (__SWITCH__)
-    static const char *fmt = RAP_SD_DIR "CHAR%04u.FIL";
-    static const char* cdfmt = RAP_SD_DIR "%s\\CHAR%04u.FIL";
+    #define FMT RAP_SD_DIR "CHAR%04u.FIL"
+    #define CDFMT RAP_SD_DIR "%s\\CHAR%04u.FIL"
 #elif defined (XBOX)
-    static const char *fmt = XBOX_HDD_DIR "CHAR%04u.FIL";
-    static const char* cdfmt = XBOX_HDD_DIR "%s\\CHAR%04u.FIL";
+    #define FMT XBOX_HDD_DIR "CHAR%04u.FIL"
+    #define CDFMT XBOX_HDD_DIR "%s\\CHAR%04u.FIL"
 #else
-    static const char *fmt = "CHAR%04u.FIL";
-    static const char* cdfmt = "%s\\CHAR%04u.FIL";
+    #define FMT "CHAR%04u.FIL"
+    #define CDFMT "%s\\CHAR%04u.FIL"
 #endif
 
 MAZELEVEL *mapmem;
@@ -377,9 +377,9 @@ RAP_AreSavedFiles(
     for (loop = 0; loop < MAX_SAVE; loop++)
     {
         if (cdflag)
-            sprintf(temp, cdfmt, cdpath, loop);
+            snprintf(temp, sizeof(temp), CDFMT, cdpath, loop);
         else
-            sprintf(temp, fmt, loop);
+            snprintf(temp, sizeof(temp), FMT, loop);
         
         if (!access(temp, 0))
             return 1;
@@ -400,7 +400,8 @@ RAP_ReadFile(
 {
     FILE *handle;
     handle = fopen(name, "rb");
-    
+    size_t flen;
+
     if (!handle)
     {
         WIN_Msg("File open Error");
@@ -408,16 +409,16 @@ RAP_ReadFile(
     }
     
     savebuffer = (char*)malloc(sizerec);
-    fread(savebuffer, 1, sizerec, handle);
+    flen = fread(savebuffer, 1, sizerec, handle);
     
-    GLB_DeCrypt(gdmodestr, savebuffer, sizerec);
+    GLB_DeCrypt(gdmodestr, savebuffer, flen);
     ReadPlayer((PLAYEROBJ*)buffer);
     
     fclose(handle);
     free(savebuffer);
     SaveResetReadWritePosition();
     
-    return sizerec;
+    return flen;
 }
 
 /***************************************************************************
@@ -437,9 +438,9 @@ RAP_FFSaveFile(
     for (loop = 0; loop < MAX_SAVE; loop++)
     {
         if (cdflag)
-            sprintf(temp, cdfmt, cdpath, loop);
+            snprintf(temp, sizeof(temp), CDFMT, cdpath, loop);
         else
-            sprintf(temp, fmt, loop);
+            snprintf(temp, sizeof(temp), FMT, loop);
         
         if (access(temp, 0) != 0)
         {
@@ -465,22 +466,28 @@ RAP_IsSaveFile(
     char temp[PATH_MAX];
     int rval, loop;
     FILE *handle;
+    size_t flen;
+
     rval = 0;
     
     for (loop = 0; loop < MAX_SAVE; loop++)
     {
         if (cdflag)
-            sprintf(temp, cdfmt, cdpath, loop);
+            snprintf(temp, sizeof(temp), CDFMT, cdpath, loop);
         else
-            sprintf(temp, fmt, loop);
+            snprintf(temp, sizeof(temp), FMT, loop);
         
         handle = fopen(temp, "rb");
         
         if (handle)
         {
             savebuffer = (char*)malloc(sizeof(tp));
-            fread(savebuffer, 1, sizeof(tp), handle);
+            flen = fread(savebuffer, 1, sizeof(tp), handle);
             
+            if(flen != sizeof(tp))
+            {
+                EXIT_Error("Error reading save file.\n");
+            }
             //GLB_DeCrypt(gdmodestr, savebuffer, sizeof(tp)); //missing in v1.2
             
             ReadPlayer(&tp);
@@ -513,6 +520,7 @@ RAP_LoadPlayer(
     char *dchrobj;
     int size;
     int rval, loop;
+    size_t flen;
     FILE *handle;
     OBJ inobj;
 
@@ -526,9 +534,9 @@ RAP_LoadPlayer(
     memset(&plr, 0, sizeof(plr));
     
     if (cdflag)
-        sprintf(filename, cdfmt, cdpath, filepos);
+        snprintf(filename, sizeof(filename), CDFMT, cdpath, filepos);
     else
-        sprintf(filename, fmt, filepos);
+        snprintf(filename, sizeof(filename), FMT, filepos);
     
     handle = fopen(filename, "rb");
     
@@ -546,13 +554,22 @@ RAP_LoadPlayer(
     savebuffer = (char*)malloc(size);
     dchrobj = (char*)malloc(size - sizeof(plr));
     
-    fread(dchrplr, 1, sizeof(plr), handle);
+    flen = fread(dchrplr, 1, sizeof(plr), handle);
+    if(flen != sizeof(plr))
+    {
+        EXIT_Error("Error reading save file.\n");
+    }
     fseek(handle, sizeof(plr), SEEK_SET);
     
     GLB_DeCrypt(gdmodestr, dchrplr, sizeof(plr));
     
     memcpy(savebuffer, dchrplr, sizeof(plr));
-    fread(dchrobj, 1, size - sizeof(plr), handle);
+    flen = fread(dchrobj, 1, size - sizeof(plr), handle);
+
+    if(flen != (size - sizeof(plr)))
+    {
+        EXIT_Error("Error reading save file.\n");
+    }
     
     GLB_DeCrypt(gdmodestr, dchrobj, size - sizeof(plr));
     
@@ -617,9 +634,9 @@ RAP_SavePlayer(
         EXIT_Error("RAP_Save() ERR: Try to save Dead player");
     
     if (cdflag)
-        sprintf(filename, cdfmt, cdpath, filepos);
+        snprintf(filename, sizeof(filename), CDFMT, cdpath, filepos);
     else
-        sprintf(filename, fmt, filepos);
+        snprintf(filename, sizeof(filename), FMT, filepos);
 
     handle = fopen(filename, "wb");
     
@@ -769,15 +786,15 @@ RAP_LoadWin(
     for (loop = 0; loop < MAX_SAVE; loop++)
     {
         if (cdflag)
-            sprintf(temp, cdfmt, cdpath, loop);
+            snprintf(temp, sizeof(temp), CDFMT, cdpath, loop);
         else
-            sprintf(temp, fmt, loop);
+            snprintf(temp, sizeof(temp), FMT, loop);
         
         if (!access(temp, 0))
         {
             if (pos == -1)
                 pos = loop;
-            strncpy(filenames[loop], temp, PATH_MAX);
+            strncpy(filenames[loop], temp, sizeof(temp));
         }
     }
     
