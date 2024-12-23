@@ -8,6 +8,8 @@
 
 static int musrate = 70;
 static int musfaderate = 50;
+
+int music_samplesperloop = 1;
 int music_init;
 int music_startoffset;
 int music_len;
@@ -237,8 +239,9 @@ MUS_Reset(
                 
                 music_device->ControllerEvent(i, 3, newvol);
             }
-            if (music_device && music_device->AllNotesOffEvent)
-                music_device->AllNotesOffEvent(i,0);
+            
+        if (music_device && music_device->AllNotesOffEvent)
+            music_device->AllNotesOffEvent(i,0);
     }
 }
 
@@ -359,7 +362,6 @@ MUS_Service(
                                 param = music_vol;
                             if (music_device && music_device->ControllerEvent)
                                 music_device->ControllerEvent(chan, 3, param);
-                                break;
 
                         default:
                             break;
@@ -415,24 +417,24 @@ MUS_Init(
     
     switch (card)
     {
-    case CARD_NONE:
+    case M_NONE:
         music_device = NULL;
         break;
     
-    case CARD_ADLIB:
-    case CARD_MV:
-    case CARD_BLASTER:
-        music_device = &mus_device_fm;
+    case M_ADLIB:
+    case M_PAS:
+    case M_SB:
+        music_device = &mus_device_opl;
         break;
     
-    case CARD_MPU1:
-    case CARD_MPU2:
-    case CARD_MPU3:
+    case M_WAVE:
+    case M_CANVAS:
+    case M_GMIDI:
     default:
         if (sys_midi)
         {
             #ifdef _WIN32
-            music_device = &mus_device_mpu;
+            music_device = &mus_device_winmm;
             #endif // _WIN32
             
             #ifdef __linux__
@@ -440,7 +442,10 @@ MUS_Init(
             #endif // __linux__
             
             #ifdef __APPLE__
-            music_device = &mus_device_core;
+            if (core_dls_synth)
+                music_device = &mus_device_corea;
+            else
+                music_device = &mus_device_corem;
             #endif // __APPLE__
         }
         else
@@ -589,21 +594,27 @@ MUS_Mix(
 )
 {
     int i;
-    
+    int mRate = musrate * music_samplesperloop;
+    int fRate = musfaderate * music_samplesperloop;
+    int gRate = gssrate * music_samplesperloop;
+    int SPLx2 = music_samplesperloop * 2;
+
     if (!music_init || !music_device || !music_device->Mix)
         return;
-    
-    for (i = 0; i < len; i++)
+
+    for (i = 0; i < len; i+=music_samplesperloop)
     {
-        music_device->Mix(stream, 1);
-        music_cnt += musrate;
+
+        music_device->Mix(stream, music_samplesperloop);
+
+        music_cnt += mRate;
         
         while (music_cnt >= fx_freq)
         {
             music_cnt -= fx_freq;
             MUS_Service();
         }
-        music_cnt2 += musfaderate;
+        music_cnt2 += fRate;
         
         while (music_cnt2 >= fx_freq)
         {
@@ -613,7 +624,7 @@ MUS_Mix(
         
         if (gsshack)
         {
-            music_cnt3 += gssrate;
+            music_cnt3 += gRate;
             
             while (music_cnt3 >= fx_freq)
             {
@@ -621,7 +632,8 @@ MUS_Mix(
                 GSS_Service();
             }
         }
-        stream += 2;
+        
+            stream += SPLx2;
     }
 }
 

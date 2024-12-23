@@ -29,7 +29,7 @@ int id_pics[4] = {
 };
 
 int mainbut[2] = {
-    FILE124_BUTTON4_PIC, FILE135_SELLITEM_PIC
+    FILE134_BUYITEM_PIC, FILE135_SELLITEM_PIC
 };
 
 int buybut[2] = {
@@ -238,7 +238,7 @@ STORE_Enter(
 )
 {
     int update, opt, oldopt, max_items, pos, cost, loop, num;
-    wdlg_t dlg;
+    SWD_DLG dlg;
     char youhave[50], coststr[50];
 
     update = 0;
@@ -359,7 +359,7 @@ STORE_Enter(
             sprintf(youhave, "%07d", plr.score);
             SWD_SetFieldText(window, STOR_SCORE, youhave);
             
-            SWD_SetFieldItem(window, STOR_BUYIT, FILE134_BUYITEM_PIC);
+            SWD_SetFieldItem(window, STOR_BUYIT, mainbut[mode]);
             
             if (pos < S_LAST_OBJECT)
                 SWD_SetFieldItem(window, STOR_COMP, items[pos]);
@@ -370,7 +370,7 @@ STORE_Enter(
         
         SWD_Dialog(&dlg);
         
-        if (keyboard[SC_X] && keyboard[SC_ALT])
+        if (KBD_Key(SC_X) && KBD_Key(SC_ALT))
             WIN_AskExit();
         
         if (dlg.viewactive)
@@ -379,7 +379,7 @@ STORE_Enter(
             {
             case STOR_VEXIT:
                 opt = dlg.sfield;
-                if ((mouseb1) || (AButton && !joy_ipt_MenuNew))                                  //Fixed ptr input
+                if ((mouseb1) || (AButton && !joy_ipt_MenuNew))                                  
                     goto store_exit;
                 if (opt != oldopt)
                 {
@@ -474,7 +474,7 @@ STORE_Enter(
         
         if (joy_ipt_MenuNew)
         {
-            if (StickY > 0)                                                   //Controller Input Store
+            if (StickY > 0)                                                   
             {
                 JOY_IsKey(StickY);
                 dlg.keypress = SC_DOWN;

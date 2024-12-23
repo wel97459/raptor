@@ -1,12 +1,17 @@
 #pragma once
 
-enum ITYPE
+typedef enum
 {
 	I_KEYBOARD,
 	I_MOUSE,
 	I_JOYSTICK,
 	I_FORCE
-};
+}ITYPE;
+
+#define BUT_1 ( buttons[0] )
+#define BUT_2 ( buttons[1] )
+#define BUT_3 ( buttons[2] )
+#define BUT_4 ( buttons[3] )
 
 extern int buttons[4];
 extern int control;

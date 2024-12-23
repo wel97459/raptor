@@ -167,7 +167,7 @@ WIN_OptDraw() -
  ***************************************************************************/
 void 
 WIN_OptDraw(
-    wdlg_t *dlg
+    SWD_DLG *dlg
 )
 {
     int x, y, lx, ly;
@@ -176,10 +176,10 @@ WIN_OptDraw(
         return;
     
     SWD_GetFieldXYL(opt_window, OPTS_VMUSIC, &x, &y, &lx, &ly);
-    GFX_PutSprite((texture_t*)GLB_GetItem(FILE127_SLIDE_PIC), x + opt_vol[MUSIC_VOL] - 2, y);
+    GFX_PutSprite((char*)GLB_GetItem(FILE127_SLIDE_PIC), x + opt_vol[MUSIC_VOL] - 2, y);
     
     SWD_GetFieldXYL(opt_window, OPTS_VFX, &x, &y, &lx, &ly);
-    GFX_PutSprite((texture_t*)GLB_GetItem(FILE127_SLIDE_PIC), x + opt_vol[FX_VOL] - 2, y);
+    GFX_PutSprite((char*)GLB_GetItem(FILE127_SLIDE_PIC), x + opt_vol[FX_VOL] - 2, y);
 }
 
 /***************************************************************************
@@ -190,7 +190,7 @@ WIN_Opts(
     void
 )
 {
-    wdlg_t dlg;
+    SWD_DLG dlg;
     int x, y, lx, ly;
     int kbactive, patchflag, curd, cur_field;
     int new_vol;
@@ -564,7 +564,7 @@ WIN_AskBool(
     int dchold;
     int ask_window;
     int px, py, lx, ly;
-    wdlg_t dlg;
+    SWD_DLG dlg;
 
     rval = 0;
     dchold = g_drawcursor;
@@ -694,7 +694,7 @@ WIN_AskDiff(
     void
 )
 {
-    wdlg_t dlg;
+    SWD_DLG dlg;
     int rval, ask_window;
     int px, py, lx, ly;
 
@@ -763,9 +763,9 @@ WIN_Register(
     void
 )
 {
-    wdlg_t dlg;
+    SWD_DLG dlg;
     int cur_id, opt, oldopt, rval, window, diff, loop;
-    player_t tp;
+    PLAYEROBJ tp;
 
     cur_id = 0;
     opt = -1;
@@ -817,7 +817,7 @@ WIN_Register(
             }
         }
         
-        if (keyboard[SC_ESC] || Back || BButton)
+        if (KBD_Key(SC_ESC) || Back || BButton)
         {
             rval = 0;
             fi_joy_count = 0;
@@ -825,7 +825,7 @@ WIN_Register(
             goto reg_exit;
         }
         
-        if (keyboard[SC_X] && keyboard[SC_ALT])
+        if (KBD_Key(SC_X) && KBD_Key(SC_ALT))
             WIN_AskExit();
 
         switch (dlg.keypress)
@@ -947,7 +947,7 @@ WIN_Register(
                     SWD_ShowAllWindows();
                     GFX_DisplayUpdate();
                 }
-                else if (dlg.keypress == SC_ENTER || keyboard[SC_ENTER])
+                else if (dlg.keypress == SC_ENTER || KBD_Key(SC_ENTER))
                 {
                     if (RAP_IsSaveFile(&tp))
                         WIN_Msg("Pilot NAME and CALLSIGN Used !");
@@ -1021,7 +1021,7 @@ reg_exit:
             tp.fintrain = 1;
         }
         
-        memcpy(&plr, &tp, sizeof(player_t));
+        memcpy(&plr, &tp, sizeof(PLAYEROBJ));
         RAP_SetPlayerDiff();
         OBJS_Add(S_FORWARD_GUNS);
         OBJS_Add(S_ENERGY);
@@ -1070,7 +1070,7 @@ WIN_Hangar(
 )
 {
     char temp[44];
-    wdlg_t dlg;
+    SWD_DLG dlg;
     int opt, oldopt, pos, kflag, local_cnt, pic_cnt, window;
     int x, y, lx, ly;
     int poslookup[4] = {
@@ -1197,13 +1197,13 @@ WIN_Hangar(
                 }
             }
             
-            if (keyboard[SC_ESC] || Back || BButton)
+            if (KBD_Key(SC_ESC) || Back || BButton)
             {
                 opt = -99;
                 goto hangar_exit;
             }
             
-            if (keyboard[SC_X] && keyboard[SC_ALT])
+            if (KBD_Key(SC_X) && KBD_Key(SC_ALT))
                 WIN_AskExit();
             
             switch (dlg.keypress)
@@ -1446,7 +1446,7 @@ WIN_ShipComp(
     void
 )
 {
-    wdlg_t dlg;
+    SWD_DLG dlg;
     int rval, secret1, secret2, secret3, secret, cz1, cz2;
     int window;
     int px, py, lx, ly;
@@ -1532,7 +1532,7 @@ WIN_ShipComp(
             }
         }
         
-        if (keyboard[SC_X] && keyboard[SC_ALT])
+        if (KBD_Key(SC_X) && KBD_Key(SC_ALT))
             WIN_AskExit();
         
         switch (dlg.keypress)
@@ -2047,7 +2047,7 @@ WIN_MainMenu(
     int window;
     int cur_opt;
     char cz1;
-    wdlg_t dlg;
+    SWD_DLG dlg;
 
     cz1 = ltable[0];
     cur_opt = 0;
@@ -2127,10 +2127,10 @@ WIN_MainMenu(
             PTR_DrawCursor(1);
         }
         
-        if (keyboard[SC_X] && keyboard[SC_ALT])
+        if (KBD_Key(SC_X) && KBD_Key(SC_ALT))
             WIN_AskExit();
         
-        if ((keyboard[SC_ESC] && ingameflag) || (Back && ingameflag) || (BButton && ingameflag))                                   
+        if ((KBD_Key(SC_ESC) && ingameflag) || (Back && ingameflag) || (BButton && ingameflag))                                   
             goto menu_exit;
         
         if ((dlg.keypress == SC_F1) || (JOY_IsKeyMenu(RightShoulder)))                                                         
