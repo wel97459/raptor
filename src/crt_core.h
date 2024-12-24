@@ -23,23 +23,37 @@ extern "C" {
     
 /* library version */
 #define CRT_MAJOR 2
-#define CRT_MINOR 1
-#define CRT_PATCH 7
+#define CRT_MINOR 3
+#define CRT_PATCH 1
 
     
-#define CRT_SYSTEM_NTSC 0 /* standard NTSC */
-#define CRT_SYSTEM_NES  1 /* decode 6 or 9-bit NES pixels */
-#define CRT_SYSTEM_PV1K 2 /* Casio PV-1000 */
+#define CRT_SYSTEM_NTSC     0 /* standard NTSC */
+#define CRT_SYSTEM_NES      1 /* decode 6 or 9-bit NES pixels */
+#define CRT_SYSTEM_PV1K     2 /* Casio PV-1000 */
+#define CRT_SYSTEM_SNES     3 /* SNES - uses RGB */
+#define CRT_SYSTEM_TEMP     4 /* template implementation */
+#define CRT_SYSTEM_NTSCVHS  5 /* standard NTSC VHS */
+#define CRT_SYSTEM_NESRGB   6 /* encode RGB image with NES artifacts */
 
 /* the system to be compiled */
+#ifndef CRT_SYSTEM
 #define CRT_SYSTEM CRT_SYSTEM_NTSC
+#endif
 
 #if (CRT_SYSTEM == CRT_SYSTEM_NES)
 #include "crt_nes.h"
+#elif (CRT_SYSTEM == CRT_SYSTEM_SNES)
+#include "crt_snes.h"
 #elif (CRT_SYSTEM == CRT_SYSTEM_NTSC)
 #include "crt_ntsc.h"
 #elif (CRT_SYSTEM == CRT_SYSTEM_PV1K)
 #include "crt_pv1k.h"
+#elif (CRT_SYSTEM == CRT_SYSTEM_TEMP)
+#include "crt_template.h"
+#elif (CRT_SYSTEM == CRT_SYSTEM_NTSCVHS)
+#include "crt_ntscvhs.h"
+#elif (CRT_SYSTEM == CRT_SYSTEM_NESRGB)
+#include "crt_nesrgb.h"
 #else
 #error No system defined
 #endif
@@ -53,7 +67,7 @@ extern "C" {
 #define CRT_PIX_FORMAT_BGRA 5  /* 4 bytes per pixel [B,G,R,A,B,G,R,A...]   */
 
 /* do bloom emulation (side effect: makes screen have black borders) */
-#define CRT_DO_BLOOM    1  /* does not work for NES */
+#define CRT_DO_BLOOM    0  /* does not work for NES */
 #define CRT_DO_VSYNC    1  /* look for VSYNC */
 #define CRT_DO_HSYNC    1  /* look for HSYNC */
 

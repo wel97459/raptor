@@ -182,17 +182,17 @@ init_eq(struct EQF *f,
     f->g[2] = g_hi;
     
     crt_sincos14(&sn, &cs, T14_PI * f_lo / rate);
-    if (EQ_P >= 15) {
-        f->lf = 2 * (sn << (EQ_P - 15));
-    } else {
-        f->lf = 2 * (sn >> (15 - EQ_P));
-    }
+#if (EQ_P >= 15)
+    f->lf = 2 * (sn << (EQ_P - 15));
+#else
+    f->lf = 2 * (sn >> (15 - EQ_P));
+#endif
     crt_sincos14(&sn, &cs, T14_PI * f_hi / rate);
-    if (EQ_P >= 15) {
-        f->hf = 2 * (sn << (EQ_P - 15));
-    } else {
-        f->hf = 2 * (sn >> (15 - EQ_P));
-    }
+#if (EQ_P >= 15)
+    f->hf = 2 * (sn << (EQ_P - 15));
+#else
+    f->hf = 2 * (sn >> (15 - EQ_P));
+#endif
 }
 
 static void
@@ -320,17 +320,53 @@ crt_demodulate(struct CRT *v, int noise)
     huecs >>= 11;
 
     rn = v->rn;
+#if !CRT_DO_VSYNC
+    /* determine field before we add noise,
+     * otherwise it's not reliably recoverable
+     */
+    for (i = -CRT_VSYNC_WINDOW; i < CRT_VSYNC_WINDOW; i++) {
+        line = POSMOD(v->vsync + i, CRT_VRES);
+        sig = v->analog + line * CRT_HRES;
+        s = 0;
+        for (j = 0; j < CRT_HRES; j++) {
+            s += sig[j];
+            if (s <= (CRT_VSYNC_THRESH * SYNC_LEVEL)) {
+                goto found_field;
+            }
+        }
+    }
+found_field:
+    /* if vsync signal was in second half of line, odd field */
+    field = (j > (CRT_HRES / 2));
+    v->vsync = -3;
+#endif
+#if ((CRT_SYSTEM == CRT_SYSTEM_NTSCVHS) && CRT_VHS_NOISE)
+    line = ((rand() % 8) - 4) + 14;
+#endif
     for (i = 0; i < CRT_INPUT_SIZE; i++) {
+        int nn = noise;
+#if ((CRT_SYSTEM == CRT_SYSTEM_NTSCVHS) && CRT_VHS_NOISE)
+        rn = rand();
+        if (i > (CRT_INPUT_SIZE - CRT_HRES * (16 + ((rand() % 20) - 10))) &&
+            i < (CRT_INPUT_SIZE - CRT_HRES * (5 + ((rand() % 8) - 4)))) {
+            int ln, sn, cs;
+            
+            ln = (i * line) / CRT_HRES;
+            crt_sincos14(&sn, &cs, ln * 8192 / 180);
+            nn = cs >> 8;
+        }
+#else
         rn = (214019 * rn + 140327895);
-
+#endif
         /* signal + noise */
-        s = v->analog[i] + (((((rn >> 16) & 0xff) - 0x7f) * noise) >> 8);
+        s = v->analog[i] + (((((rn >> 16) & 0xff) - 0x7f) * nn) >> 8);
         if (s >  127) { s =  127; }
         if (s < -127) { s = -127; }
         v->inp[i] = s;
     }
     v->rn = rn;
 
+#if CRT_DO_VSYNC
     /* Look for vertical sync.
      * 
      * This is done by integrating the signal and
@@ -355,13 +391,11 @@ crt_demodulate(struct CRT *v, int noise)
         }
     }
 vsync_found:
-#if CRT_DO_VSYNC
     v->vsync = line; /* vsync found (or gave up) at this line */
-#else
-    v->vsync = -3;
-#endif
     /* if vsync signal was in second half of line, odd field */
     field = (j > (CRT_HRES / 2));
+#endif
+
 #if CRT_DO_BLOOM
     max_e = (128 + (noise / 2)) * AV_LEN;
     prev_e = (16384 / 8);
@@ -373,8 +407,8 @@ vsync_found:
     field = (field * (ratio / 2));
 
     for (line = CRT_TOP; line < CRT_BOT; line++) {
-        unsigned pos, ln;
-        int scanL, scanR, dx;
+        unsigned pos, ln, scanR;
+        int scanL, dx;
         int L, R;
         unsigned char *cL, *cR;
 #if (CRT_CC_SAMPLES == 4)
@@ -578,35 +612,23 @@ vsync_found:
 
             switch (v->out_format) {
                 case CRT_PIX_FORMAT_RGB:
-                    cL[0] = bb >> 16 & 0xff;
-                    cL[1] = bb >>  8 & 0xff;
-                    cL[2] = bb >>  0 & 0xff;
-                    break;
                 case CRT_PIX_FORMAT_RGBA:
                     cL[0] = bb >> 16 & 0xff;
                     cL[1] = bb >>  8 & 0xff;
                     cL[2] = bb >>  0 & 0xff;
-                    cL[3] = 255;
                     break;
                 case CRT_PIX_FORMAT_BGR: 
-                    cL[0] = bb >>  0 & 0xff;
-                    cL[1] = bb >>  8 & 0xff;
-                    cL[2] = bb >> 16 & 0xff;
-                    break;
                 case CRT_PIX_FORMAT_BGRA:
                     cL[0] = bb >>  0 & 0xff;
                     cL[1] = bb >>  8 & 0xff;
                     cL[2] = bb >> 16 & 0xff;
-                    cL[3] = 255;
                     break;
                 case CRT_PIX_FORMAT_ARGB:
-                    cL[0] = 255;
                     cL[1] = bb >> 16 & 0xff;
                     cL[2] = bb >>  8 & 0xff;
                     cL[3] = bb >>  0 & 0xff;
                     break;
                 case CRT_PIX_FORMAT_ABGR:
-                    cL[0] = 255;
                     cL[1] = bb >>  0 & 0xff;
                     cL[2] = bb >>  8 & 0xff;
                     cL[3] = bb >> 16 & 0xff;

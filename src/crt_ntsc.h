@@ -34,7 +34,7 @@ extern "C" {
 
 /* NOTE, in general, increasing CRT_CB_FREQ reduces blur and bleed */
 #define CRT_CB_FREQ     4 /* carrier frequency relative to sample rate */
-#define CRT_HRES        (CRT_CC_LINE * CRT_CB_FREQ / 6) /* horizontal res */
+#define CRT_HRES        (CRT_CC_LINE * CRT_CB_FREQ / 10) /* horizontal res */
 #define CRT_VRES        262                       /* vertical resolution */
 #define CRT_INPUT_SIZE  (CRT_HRES * CRT_VRES)
 
@@ -46,15 +46,15 @@ extern "C" {
 #define CRT_CC_VPER     1 /* vertical period in which the artifacts repeat */
 
 /* search windows, in samples */
-#define CRT_HSYNC_WINDOW 35
-#define CRT_VSYNC_WINDOW 35
+#define CRT_HSYNC_WINDOW 8
+#define CRT_VSYNC_WINDOW 8
 
 /* accumulated signal threshold required for sync detection.
  * Larger = more stable, until it's so large that it is never reached in which
  *          case the CRT won't be able to sync
  */
-#define CRT_HSYNC_THRESH 25
-#define CRT_VSYNC_THRESH 125
+#define CRT_HSYNC_THRESH 4
+#define CRT_VSYNC_THRESH 94
 
 /*
  *                      FULL HORIZONTAL LINE SIGNAL (~63500 ns)
