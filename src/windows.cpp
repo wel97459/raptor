@@ -152,7 +152,8 @@ WIN_Msg(
     SWD_SetFieldText(window, INFO_MSG, msg);
     SWD_ShowAllWindows();
     GFX_DisplayUpdate();
-    
+
+    IPT_CalJoyRumbleLow();
     SND_Patch(FX_SWEP, 127);
     
     IMS_WaitTimed(10);
@@ -222,7 +223,8 @@ WIN_Opts(
     SWD_SetFieldItem(opt_window, OPTS_PIC3, -1);
     
     SWD_ShowAllWindows();
-    
+
+    IPT_CalJoyRumbleLow();
     SND_Patch(FX_SWEP, 127);
     GFX_DisplayUpdate();
 
@@ -326,6 +328,7 @@ WIN_Opts(
             if (kbactive && cur_field > 0)
                 cur_field--;
             kbactive = 1;
+            IPT_CalJoyRumbleLow();
             SND_Patch(FX_SWEP, 127);
             SWD_SetFieldItem(opt_window, OPTS_PIC1, -1);
             SWD_SetFieldItem(opt_window, OPTS_PIC2, -1);
@@ -339,6 +342,7 @@ WIN_Opts(
             if (kbactive && cur_field < 2)
                 cur_field++;
             kbactive = 1;
+            IPT_CalJoyRumbleLow();
             SND_Patch(FX_SWEP, 127);
             SWD_SetFieldItem(opt_window, OPTS_PIC1, -1);
             SWD_SetFieldItem(opt_window, OPTS_PIC2, -1);
@@ -459,10 +463,12 @@ sf_goback:
                     INI_PutPreferenceLong("SoundFX", "Volume", fx_volume);
                 }
                 INI_PutPreferenceLong("Setup", "Detail", opt_detail);
+                IPT_CalJoyRumbleLow();
                 SND_Patch(FX_SWEP, 127);
                 goto exit_opts;
             
             case OPTS_DETAIL:
+                IPT_CalJoyRumbleLow();
                 SND_Patch(FX_SWEP, 127);
                 curd ^= 1;
                 SWD_SetFieldText(opt_window, OPTS_DETAIL, detail[curd]);
@@ -472,8 +478,10 @@ sf_goback:
             }
         }
         
-        if (patchflag)
+        if (patchflag){
+            IPT_CalJoyRumbleLow();
             SND_Patch(FX_SWEP, 127);
+        }
     }
 
 exit_opts:
@@ -503,7 +511,8 @@ WIN_Pause(
     
     SWD_ShowAllWindows();
     GFX_DisplayUpdate();
-    
+
+    IPT_CalJoyRumbleLow();
     SND_Patch(FX_SWEP, 127);
     
     while (!IMS_CheckAck())                                      
@@ -623,6 +632,7 @@ WIN_AskBool(
     SWD_ShowAllWindows();
     GFX_DisplayUpdate();
     
+    IPT_CalJoyRumbleLow();
     SND_Patch(FX_SWEP, 127);
     
     PTR_DrawCursor(1);
@@ -1273,6 +1283,8 @@ WIN_Hangar(
                 KBD_Wait(SC_LEFT);
                 pos++;
                 pos %= 4;
+                IPT_CalJoyRumbleLow();
+                SND_Patch(FX_SWEP, 127);
                 break;
 
             case SC_RIGHT:
@@ -1283,6 +1295,9 @@ WIN_Hangar(
                 pos--;
                 if (pos < 0)
                     pos = 3;
+
+                IPT_CalJoyRumbleLow();
+                SND_Patch(FX_SWEP, 127);
                 break;
             
             case SC_ENTER:
@@ -1331,6 +1346,7 @@ keyboard_part:
                     opt = dlg.sfield;
                     if ((mouseb1) || (dlg.keypress == SC_ENTER) || (AButton && !joy_ipt_MenuNew))                
                     {
+                        IPT_CalJoyRumbleMedium();
                         SND_Patch(FX_DOOR, 60);
                         while (IMS_IsAck())
                         {
@@ -1351,6 +1367,7 @@ keyboard_part:
                     opt = dlg.sfield;
                     if ((mouseb1) || (dlg.keypress == SC_ENTER) || (AButton && !joy_ipt_MenuNew))               
                     {
+                        IPT_CalJoyRumbleMedium();
                         SND_Patch(FX_DOOR, 127);
                         while (IMS_IsAck())
                         {
@@ -1372,6 +1389,7 @@ keyboard_part:
                     if ((mouseb1) || (dlg.keypress == SC_ENTER) || (AButton && !joy_ipt_MenuNew))             
                     {
                         opt = -99;
+                        IPT_CalJoyRumbleMedium();
                         SND_Patch(FX_DOOR, 200);
                         while (IMS_IsAck())
                         {

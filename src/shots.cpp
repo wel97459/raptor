@@ -10,6 +10,7 @@
 #include "eshot.h"
 #include "objects.h"
 #include "fileids.h"
+#include "joyapi.h"
 
 SHOTS shots[MAX_SHOTS];
 
@@ -1208,6 +1209,7 @@ SHOTS_Think(
                 switch (lib->type)
                 {
                 case S_MEGA_BOMB:
+                    IPT_CalJoyRumbleHigh();                                                                   
                     ESHOT_Clear();
                     TILE_DamageAll();
                     for (enemy = first_enemy.next; &last_enemy != enemy; enemy = enemy->next)

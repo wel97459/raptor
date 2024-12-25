@@ -556,6 +556,7 @@ RAP_DisplayStats(
             draw_player = 0;
             SND_Patch(FX_AIREXPLO, 127);
             SND_Patch(FX_AIREXPLO2, 127);
+            IPT_CalJoyRumbleMedium(); 
             ANIMS_StartAnim(A_LARGE_AIR_EXPLO, player_cx, player_cy);
             
             for (loop = 0; loop < (PLAYERWIDTH * PLAYERHEIGHT) / 2; loop++)
@@ -563,11 +564,15 @@ RAP_DisplayStats(
                 x = playerx - (PLAYERWIDTH / 2) + (wrand() % 32) * 2;
                 y = playery - (PLAYERWIDTH / 2) + (wrand() % 32) * 2;
                 
-                if (loop & 1)
+                if (loop & 1){
+                    IPT_CalJoyRumbleLow(); 
                     ANIMS_StartAnim(A_LARGE_AIR_EXPLO, x, y);
-                else
+                }else{
+                    IPT_CalJoyRumbleLow(); 
                     ANIMS_StartAAnim(A_MED_AIR_EXPLO2, x, y);
+                }
             }
+            IPT_CalJoyRumbleHigh();
             SND_Patch(FX_AIREXPLO2, 127);
         }
     }
@@ -606,11 +611,7 @@ RAP_DisplayStats(
                 if (damage)
                 {
                     damage--;
-                    
-                    if ((haptic) && (control == 2))
-                    {
-                        IPT_CalJoyRumbleHigh();                                                                   
-                    }
+                    IPT_CalJoyRumbleHigh();                                                                   
                 }
             }
         }
@@ -1010,6 +1011,7 @@ Do_Game(
             BUT_2 = 0;
             if (!b2_flag)
             {
+                IPT_CalJoyRumbleLow();
                 SND_Patch(FX_SWEP, 127);
                 b2_flag = 1;
                 OBJS_GetNext();

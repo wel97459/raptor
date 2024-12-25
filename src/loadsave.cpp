@@ -805,6 +805,7 @@ RAP_LoadWin(
     KBD_Clear();
     window = SWD_InitWindow(FILE139_LOAD_SWD);
     SWD_SetActiveField(window, LOAD_LOAD);
+    IPT_CalJoyRumbleLow();
     SND_Patch(FX_SWEP, 127);
     
     while (1)
@@ -883,6 +884,7 @@ RAP_LoadWin(
             SWD_SetFieldText(window, LOAD_CREDITS, temp);
             SWD_ShowAllWindows();
             GFX_DisplayUpdate();
+            IPT_CalJoyRumbleLow();
             SND_Patch(FX_SWEP, 127);
             }
         

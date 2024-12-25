@@ -10,6 +10,10 @@
 #include "kbdapi.h"
 #include "windows.h"
 #include "fileids.h"
+#include "joyapi.h"
+#ifdef __SWITCH__
+    #include "nsx.h"
+#endif
 
 FRAME frm[90];
 
@@ -46,17 +50,20 @@ INTRO_City(
         cur->soundfx = -1;
         cur->fx_vol = 0;
         cur->fx_xpos = 127;
-        
+        cur->joy_rumble = 0;
+
         if (loop == 4)
         {
             cur->soundfx = FX_FLYBY;
             cur->fx_xpos = 210;
+            cur->joy_rumble = 3;   
         }
         
         if (loop == 9)
         {
             cur->soundfx = FX_FLYBY;
             cur->fx_xpos = 100;
+            cur->joy_rumble = 2; 
         }
     }
     
@@ -108,6 +115,7 @@ INTRO_Side1(
         cur->fx_vol = 127;
         cur->fx_xpos = 127;
         cur->soundfx = -1;
+        cur->joy_rumble = 5;
     }
     
     if (MOVIE_Play(frm, 2, palette) == K_SKIPALL)
@@ -151,6 +159,7 @@ INTRO_Pilot(
         cur->soundfx = -1;
         cur->fx_vol = 127;
         cur->fx_xpos = 127;
+        cur->joy_rumble = 10;
     }
     
     if (MOVIE_Play(frm, 1, palette) == K_SKIPALL)
@@ -194,17 +203,20 @@ INTRO_Explosion(
         cur->soundfx = -1;
         cur->fx_vol = 127;
         cur->fx_xpos = 127;
-        
+        cur->joy_rumble = 0;
+
         if (loop >= 2 && loop < 10)
         {
             cur->soundfx = FX_INTROHIT;
             cur->fx_xpos = 0x6e + (wrand() % 40);
+            cur->joy_rumble = 1; 
         }
         
         if (loop >= 8)
         {
             if (loop & 1)
             {
+                cur->joy_rumble = 3; 
                 cur->soundfx = FX_AIREXPLO;
             }
         }
@@ -261,6 +273,7 @@ INTRO_Side2(
         cur->fx_vol = 50;
         cur->fx_xpos = 127;
         cur->soundfx = -1;
+        cur->joy_rumble = 5;
     }
     
     opt = MOVIE_Play(frm, 1, palette);
@@ -293,8 +306,12 @@ INTRO_Side2(
         cur->songstep = 0;
         cur->soundfx = -1;
         cur->fx_xpos = 127;
-        if (loop > 1)
+        cur->joy_rumble = 0;
+
+        if (loop > 1){
             cur->soundfx = FX_INTROGUN;
+            cur->joy_rumble = 2;
+        }
     }
     
     if (MOVIE_Play(frm, 1, palette) == K_SKIPALL)
@@ -340,6 +357,7 @@ INTRO_Base(
         cur->songopt = S_PLAY;
         cur->songstep = 0;
         cur->soundfx = -1;
+        cur->joy_rumble = 0;
         cur++;
     }
     
@@ -386,6 +404,9 @@ INTRO_Landing(
         cur->songopt = S_PLAY;
         cur->songstep = 0;
         cur->soundfx = -1;
+        cur->joy_rumble = 0;
+        if(loop == 25)
+            cur->joy_rumble = 1;
         cur++;
     }
     
@@ -433,6 +454,7 @@ INTRO_Death2(
         cur->songopt = S_PLAY;
         cur->songstep = 0;
         cur->soundfx = -1;
+        cur->joy_rumble = 6;
         cur++;
     }
     
@@ -480,6 +502,7 @@ INTRO_Death1(
         cur->songopt = S_PLAY;
         cur->songstep = 0;
         cur->soundfx = -1;
+        cur->joy_rumble = 5;
         cur++;
     }
     
@@ -538,6 +561,7 @@ INTRO_Game1End(
         cur->songopt = S_PLAY;
         cur->songstep = 0;
         cur->soundfx = -1;
+        cur->joy_rumble = 0;
         cur++;
     }
     
@@ -587,17 +611,20 @@ INTRO_Game2End(
         cur->songopt = S_PLAY;
         cur->songstep = 0;
         cur->soundfx = -1;
+        cur->joy_rumble = 0;
         
         if (loop == 22)
         {
             cur->soundfx = FX_AIREXPLO;
             cur->fx_xpos = 127;
+            cur->joy_rumble = 3;
         }
         
         if (loop == 24)
         {
             cur->soundfx = FX_AIREXPLO;
             cur->fx_xpos = 127;
+            cur->joy_rumble = 3;
         }
         cur++;
     }
@@ -650,17 +677,20 @@ INTRO_Game3End(
         cur->songopt = S_PLAY;
         cur->songstep = 0;
         cur->soundfx = -1;
+        cur->joy_rumble = 0;
         
         if (loop == 30)
         {
             cur->soundfx = FX_AIREXPLO;
             cur->fx_xpos = 100;
+            cur->joy_rumble = 2;
         }
         
         if (loop == 32)
         {
             cur->soundfx = FX_AIREXPLO;
             cur->fx_xpos = 100;
+            cur->joy_rumble = 2;
         }
         cur++;
     }
@@ -831,7 +861,7 @@ INTRO_Credits(
             I_GetEvent();
         }
     }
-    
+
     GFX_FadeOut(0, 0, 0, 63);
     
     GLB_FreeItem(FILE12c_POGPAL_DAT);
@@ -857,9 +887,15 @@ INTRO_Credits(
         if (IMS_IsAck() && loop > 0)
             break;
         
-        if (loop == 1 || loop == 40)
+        if(loop > 1 && loop < 40){
+            #ifdef __SWITCH__
+            NSX_RumbleCustom(0.1f);
+            #endif
+        }
+        if (loop == 1 || loop == 40){
             SND_Patch(FX_BOSS1, 127);
-        
+        }
+
         if (loop == 45)
             SND_PlaySong(FILE056_RINTRO_MUS, 1, 1);
         

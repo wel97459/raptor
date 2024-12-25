@@ -598,18 +598,21 @@ STORE_Enter(
             switch (dlg.field)
             {
             case STOR_NEXT:
+                IPT_CalJoyRumbleLow();
                 SND_Patch(FX_SWEP, 127);
                 if (max_items)
                     cur_item++;
                 break;
             
             case STOR_PREV:
+                IPT_CalJoyRumbleLow();
                 SND_Patch(FX_SWEP, 127);
                 if (max_items)
                     cur_item--;
                 break;
             
             case STOR_BUY:
+                IPT_CalJoyRumbleLow();
                 SND_Patch(FX_SWEP, 127);
                 mode = BUY_MODE;
                 max_items = MakeBuyItems();
@@ -617,6 +620,7 @@ STORE_Enter(
                 break;
             
             case STOR_SELL:
+                IPT_CalJoyRumbleLow();
                 SND_Patch(FX_SWEP, 127);
                 mode = SELL_MODE;
                 max_items = MakeSellItems();
@@ -630,6 +634,7 @@ STORE_Enter(
                     switch (OBJS_Buy(pos))
                     {
                     case OBJ_GOTIT:
+                        IPT_CalJoyRumbleLow();
                         SND_Patch(FX_SWEP, 127);
                         break;
                     
@@ -660,6 +665,7 @@ STORE_Enter(
                     pos = s_items[cur_item];
                     OBJS_Sell(pos);
                     MakeSellItems();
+                    IPT_CalJoyRumbleLow();
                     SND_Patch(FX_SWEP, 127);
                     for (loop = 0; loop < sell_count; loop++)
                     {

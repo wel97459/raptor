@@ -8,7 +8,10 @@
 #include "glbapi.h"
 #include "i_video.h"
 #include "kbdapi.h"
-
+#include "joyapi.h"
+#ifdef __SWITCH__
+    #include "nsx.h"
+#endif
 int back_patch = -1;
 
 /*************************************************************************
@@ -128,6 +131,26 @@ MOVIE_Play(
             SND_Patch(curfld->soundfx, curfld->fx_xpos);
         }
         
+        if(curfld->joy_rumble != 0)
+            switch (curfld->joy_rumble)
+            {
+            case 1:
+                IPT_CalJoyRumbleLow();
+                break;
+            case 2:
+                IPT_CalJoyRumbleMedium();
+                break;
+            case 3:
+                IPT_CalJoyRumbleHigh();
+                break;
+            default:
+                #ifdef __SWITCH__
+                NSX_RumbleCustom(((float) curfld->joy_rumble - 3) / 10);
+                #endif
+                break;
+            }
+        
+
         switch (curfld->endf)
         {
         case M_ERASE:

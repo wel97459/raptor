@@ -11,6 +11,7 @@
 #include "kbdapi.h"
 #include "joyapi.h"
 #include "input.h"
+#include "nsx.h"
 
 int g_joy_ascii;
 unsigned int fi_joy_count;
@@ -2422,36 +2423,44 @@ SWD_Dialog(
         switch (cur_cmd)
         {
         case F_DOWN:
+            IPT_CalJoyRumbleLow();
             SWD_GetDownField(firstfld, curwin->numflds);
             break;
         
         case F_UP:
+            IPT_CalJoyRumbleLow();
             SWD_GetUpField(firstfld, curwin->numflds);
             break;
         
         case F_NEXT:
         case F_RIGHT:
+            IPT_CalJoyRumbleLow();
             SWD_GetNextField(firstfld, curwin->numflds);
             break;
         
         case F_PREV:
         case F_LEFT:
+            IPT_CalJoyRumbleLow();
             SWD_GetPrevField(firstfld, curwin->numflds);
             break;
         
         case F_TOP:
+            IPT_CalJoyRumbleLow();
             active_field = SWD_GetFirstField();
             break;
         
         case F_BOTTOM:
+            IPT_CalJoyRumbleLow();
             active_field = SWD_GetLastField(firstfld, curwin->numflds);
             break;
         
         case F_FIRST:
+            IPT_CalJoyRumbleLow();
             active_field = curwin->firstfld;
             break;
         
         case F_SELECT:
+            IPT_CalJoyRumbleLow();
             curfld->bstatus = DOWN;
             SWD_PutField(curwin, curfld);
             curfld->mark ^= 1;
@@ -2563,6 +2572,10 @@ SWD_Dialog(
     
     if (update)
         GFX_DisplayUpdate();
+
+    #ifdef __SWITCH__
+        NSX_RumbleUpdate();
+    #endif
 }
 
 /***************************************************************************

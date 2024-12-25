@@ -417,10 +417,7 @@ ESHOT_Think(
                 {
                     shot->move.y2 = player_cy + (wrand() % 4) - 2;
                     OBJS_SubEnergy(lib->hits);
-                    if ((haptic) && (control == 2))
-                    {
-                        IPT_CalJoyRumbleLow();                                            //Rumble when Laser eshot is hit
-                    }
+                    IPT_CalJoyRumbleHigh();                                            //Rumble when Laser eshot is hit
                 }
             }
             else
@@ -462,6 +459,7 @@ ESHOT_Think(
                 {
                     shot->doneflag = 1;
                     ANIMS_StartAnim(A_SMALL_AIR_EXPLO, shot->x + 4, shot->y + 4);
+                    IPT_CalJoyRumbleMedium();    
                 }
             }
             
@@ -479,10 +477,7 @@ ESHOT_Think(
                 ANIMS_StartAnim(A_SMALL_AIR_EXPLO, shot->x, shot->y);
                 shot->doneflag = 1;
                 OBJS_SubEnergy(lib->hits);
-                if ((haptic) && (control == 2))
-                {
-                    IPT_CalJoyRumbleLow();                                                                 //Rumble when eshot is hit
-                }
+                IPT_CalJoyRumbleMedium();                                                                 //Rumble when eshot is hit
             }
             break;
         }

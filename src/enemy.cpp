@@ -1031,10 +1031,8 @@ void ENEMY_Think(
             {
                 if (player_cy > sprite->y && player_cy < sprite->y2)
                 {
-                    if ((haptic) && (control == 2))
-                    {
-                        IPT_CalJoyRumbleMedium();                                                            //Rumble when enemy hit
-                    }
+                    IPT_CalJoyRumbleHigh();                                                            //Rumble when enemy hit
+                    
                     sprite->hits -= (PLAYERWIDTH / 2);
                     if (sprite->width > sprite->height)
                         suben = sprite->width;
@@ -1059,23 +1057,28 @@ void ENEMY_Think(
             switch (curlib->exptype)
             {
             case EXP_ENERGY:
+                IPT_CalJoyRumbleLow();
                 ANIMS_StartAnim(A_ENERGY_AIR_EXPLO, sprite->x + sprite->hlx, sprite->y + sprite->hly);
                 BONUS_Add(S_ITEMBUY6, sprite->x, sprite->y);
                 break;
             
             case EXP_AIRSMALL1:
+                IPT_CalJoyRumbleLow();
                 ANIMS_StartAnim(A_MED_AIR_EXPLO, sprite->x + sprite->hlx, sprite->y + sprite->hly);
                 break;
             
             case EXP_AIRSMALL2:
+                IPT_CalJoyRumbleLow();
                 ANIMS_StartAnim(A_MED_AIR_EXPLO2, sprite->x + sprite->hlx, sprite->y + sprite->hly);
                 break;
             
             case EXP_AIRMED:
+                IPT_CalJoyRumbleMedium();
                 ANIMS_StartAnim(A_LARGE_AIR_EXPLO, sprite->x + sprite->hlx, sprite->y + sprite->hly);
                 break;
             
             case EXP_AIRLARGE:
+                IPT_CalJoyRumbleHigh();
                 ANIMS_StartAnim(A_LARGE_AIR_EXPLO, sprite->x + sprite->hlx, sprite->y + sprite->hly);
                 area = (sprite->width>>4) * (sprite->height>>4);
                 for (loop = 0; loop < area; loop++)
@@ -1086,14 +1089,18 @@ void ENEMY_Think(
                         ANIMS_StartAnim(A_MED_AIR_EXPLO, x, y);
                     else
                         ANIMS_StartAAnim(A_MED_AIR_EXPLO2, x, y);
+                    
+                    IPT_CalJoyRumbleLow();
                 }
                 break;
             
             case EXP_GRDSMALL:
+                IPT_CalJoyRumbleLow();                                                                   
                 ANIMS_StartAnim(A_SMALL_GROUND_EXPLO, sprite->x + sprite->hlx, sprite->y + sprite->hly);
                 break;
             
             case EXP_GRDMED:
+                IPT_CalJoyRumbleMedium();                                                                   
                 x = sprite->x + (wrand() % sprite->width);
                 y = sprite->y + (wrand() % sprite->height);
                 if ((wrand() % 2) == 0)
@@ -1104,6 +1111,7 @@ void ENEMY_Think(
                 break;
             
             case EXP_GRDLARGE:
+                IPT_CalJoyRumbleMedium();
                 ANIMS_StartAnim(A_LARGE_GROUND_EXPLO1, sprite->x + sprite->hlx, sprite->y + sprite->hly);
                 area = (sprite->width>>4) * (sprite->height>>4);
                 for (loop = 0; loop < area; loop++)
@@ -1116,11 +1124,13 @@ void ENEMY_Think(
                     else
                         ANIMS_StartAnim(A_GROUND_SPARKLE, x, y);
                     
+                    IPT_CalJoyRumbleLow();
                     ANIMS_StartAnim(A_SMALL_GROUND_EXPLO, x, y);
                 }
                 break;
             
             case EXP_BOSS:
+                IPT_CalJoyRumbleHigh();
                 ANIMS_StartAnim(A_LARGE_AIR_EXPLO, sprite->x + sprite->hlx, sprite->y + sprite->hly);
                 area = (sprite->width>>4) * (sprite->height>>4);
                 for (loop = 0; loop < area; loop++)
@@ -1128,18 +1138,25 @@ void ENEMY_Think(
                     x = sprite->x + (wrand() % sprite->width);
                     y = sprite->y + (wrand() % sprite->height);
                     ANIMS_StartAAnim(A_GROUND_FLARE, x, y);
-                    if (loop & 1)
+                    if (loop & 1){
                         ANIMS_StartAnim(A_LARGE_AIR_EXPLO, x, y);
-                    else
+                        IPT_CalJoyRumbleLow();
+                    }else{
                         ANIMS_StartAnim(A_MED_AIR_EXPLO2, x, y);
+                        IPT_CalJoyRumbleMedium();
+                    }
                 }
                 break;
             
             case EXP_PERSON:
+                
+                IPT_CalJoyRumbleLow();
                 ANIMS_StartAnim(A_PERSON, sprite->x + sprite->hlx, sprite->y + sprite->hly);
                 break;
             
             case EXP_PLATOON:
+                
+                IPT_CalJoyRumbleLow();
                 ANIMS_StartAnim(A_PLATOON, sprite->x + sprite->hlx, sprite->y + sprite->hly);
                 break;
             }

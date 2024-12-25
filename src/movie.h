@@ -52,6 +52,7 @@ typedef struct
     int soundfx;               // SOUND FX START
     int fx_vol;                // SOUND FX VOLUME
     int fx_xpos;               // SOUND FX XPOS
+    int joy_rumble;
 }FRAME;
 
 void ANIM_Render(ANIMLINE *inmem);

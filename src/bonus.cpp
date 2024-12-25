@@ -7,6 +7,7 @@
 #include "objects.h"
 #include "fx.h"
 #include "fileids.h"
+#include "joyapi.h"
 
 BONUS bons[MAX_BONUS];
 BONUS first_bonus, last_bonus;
@@ -214,6 +215,7 @@ BONUS_Think(
         {
             if (!cur->dflag && OBJS_GetAmt(S_ENERGY) > 0)
             {
+                IPT_CalJoyRumbleLow();
                 SND_Patch(FX_BONUS, 127);
                 
                 if (cur->type == S_ENERGY)

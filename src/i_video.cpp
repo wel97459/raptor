@@ -38,7 +38,7 @@
 #include "musapi.h"
 #include "prefapi.h"
 #include "joyapi.h"
-
+#include "nsx.h"
 // These are (1) the window (or the full screen) that our game is rendered to
 // and (2) the renderer that scales the texture (see below) into this window.
 
@@ -829,6 +829,10 @@ void I_FinishUpdate (void)
 
     SDL_RenderPresent(renderer);
 
+
+	#ifdef __SWITCH__
+	NSX_RumbleUpdate();
+	#endif
 #if 0
     // Restore background and undo the disk indicator, if it was drawn.
     V_RestoreDiskBackground();

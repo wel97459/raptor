@@ -1,6 +1,7 @@
 #include "SDL.h"
 #include "i_video.h"
 #include "joyapi.h"
+#include "nsx.h"
 
 int joy_ack;
 
@@ -28,6 +29,10 @@ IPT_CalJoy(
 	void
 )
 {
+	#ifdef __SWITCH__
+	NSX_RumbleInit();
+	#endif
+
 	SDL_Init(SDL_INIT_GAMECONTROLLER | SDL_INIT_HAPTIC);
 
 	MaxJoysticks = SDL_NumJoysticks();
@@ -176,6 +181,11 @@ IPT_CalJoyRumbleLow(
 	void
 )
 {
+	if (!haptic && (control != 2))
+		return;
+	#ifdef __SWITCH__
+		NSX_RumbleLow();
+	#else
 	for (ControllerIndex = 0;
 		ControllerIndex < MAX_CONTROLLERS;
 		++ControllerIndex)
@@ -183,6 +193,7 @@ IPT_CalJoyRumbleLow(
 		if (ControllerHandles[ControllerIndex])
 			SDL_GameControllerRumble(ControllerHandles[ControllerIndex], 0x3fff, 0x3fff, 1000);
 	}
+	#endif
 }
 
 /***************************************************************************
@@ -193,6 +204,11 @@ IPT_CalJoyRumbleMedium(
 	void
 )
 {
+	if (!haptic && (control != 2))
+		return;
+	#ifdef __SWITCH__
+		NSX_RumbleMed();
+	#else
 	for (ControllerIndex = 0;
 		ControllerIndex < MAX_CONTROLLERS;
 		++ControllerIndex)
@@ -200,6 +216,7 @@ IPT_CalJoyRumbleMedium(
 		if (ControllerHandles[ControllerIndex])
 		    SDL_GameControllerRumble(ControllerHandles[ControllerIndex], 0x7ffe, 0x7ffe, 1000);
 	}
+	#endif
 }
 
 /***************************************************************************
@@ -210,6 +227,11 @@ IPT_CalJoyRumbleHigh(
 	void
 )
 {
+	if (!haptic && (control != 2))
+		return;
+	#ifdef __SWITCH__
+		NSX_RumbleHigh();
+	#else
 	for (ControllerIndex = 0;
 		ControllerIndex < MAX_CONTROLLERS;
 		++ControllerIndex)
@@ -217,6 +239,7 @@ IPT_CalJoyRumbleHigh(
 		if (ControllerHandles[ControllerIndex])
 			SDL_GameControllerRumble(ControllerHandles[ControllerIndex], 0xbffd, 0xbffd, 1000);
 	}
+	#endif
 }
 
 /***************************************************************************

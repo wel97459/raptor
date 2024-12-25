@@ -8,6 +8,7 @@
 #include "loadsave.h"
 #include "fx.h"
 #include "anims.h"
+#include "joyapi.h"
 
 #define MAX_STILES ( MAP_ONSCREEN * MAP_COLS )
 #define MAX_TILEDELAY ( ( MAP_ONSCREEN + 1 ) * MAP_COLS )
@@ -367,6 +368,7 @@ TILE_Think(
                 TILE_Explode(ts, 10);
                 ANIMS_StartAnim(A_LARGE_GROUND_EXPLO1, x + 16, y + 16);
                 
+                    IPT_CalJoyRumbleMedium();
                 tdead[mapspot] = 1;
             }
         }
